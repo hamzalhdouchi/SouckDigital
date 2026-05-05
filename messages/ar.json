@@ -1,0 +1,282 @@
+{
+  "navigation": {
+    "home": "الرئيسية",
+    "categories": "الفئات",
+    "deals": "العروض",
+    "vendors": "البائعون",
+    "cart": "سلة التسوق",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "profile": "حسابي",
+    "orders": "طلباتي",
+    "wishlist": "المفضلة",
+    "logout": "تسجيل الخروج",
+    "myAccount": "حسابي",
+    "vendorSpace": "فضاء البائع",
+    "help": "المساعدة"
+  },
+  "search": {
+    "placeholder": "ابحث عن المنتجات، الماركات، الحرفيين...",
+    "button": "بحث",
+    "noResults": "لا توجد نتائج لـ «{query}»",
+    "suggestions": "اقتراحات"
+  },
+  "homepage": {
+    "hero": {
+      "slide1Title": "الصناعة التقليدية المغربية\nبين يديك",
+      "slide1Subtitle": "اكتشف آلاف المنتجات الأصيلة المعتمدة",
+      "slide1Cta": "استكشف الآن",
+      "slide2Title": "تخفيضات اليوم",
+      "slide2Subtitle": "خصومات تصل إلى 70٪ على منتجات مختارة",
+      "slide2Cta": "عرض العروض",
+      "slide3Title": "التوصيل في كل أنحاء المغرب",
+      "slide3Subtitle": "24 إلى 72 ساعة في المدن — الدفع عند الاستلام متاح",
+      "slide3Cta": "اطلب الآن"
+    },
+    "promoBanner": "🎉 توصيل مجاني من 300 درهم · الدفع عند الاستلام متاح في كل المغرب",
+    "flashSales": {
+      "title": "تخفيضات مؤقتة",
+      "endsIn": "ينتهي خلال",
+      "viewAll": "عرض الكل",
+      "hours": "س",
+      "minutes": "د",
+      "seconds": "ث"
+    },
+    "categories": {
+      "title": "فئاتنا",
+      "viewAll": "عرض جميع الفئات"
+    },
+    "featuredProducts": {
+      "title": "منتجات مميزة",
+      "viewAll": "عرض جميع المنتجات"
+    },
+    "artisan": {
+      "title": "الصناعة التقليدية الأصيلة",
+      "subtitle": "معتمدة من المكتب الوطني للصناعة التقليدية المغربية",
+      "badge": "معتمد",
+      "cta": "اكتشف الصناعة التقليدية"
+    },
+    "vendors": {
+      "title": "بائعون مميزون",
+      "viewAll": "عرض جميع البائعين"
+    },
+    "trust": {
+      "delivery": { "title": "التوصيل في المغرب", "sub": "24-72 ساعة في المدن الكبرى" },
+      "cod":      { "title": "الدفع عند الاستلام", "sub": "متاح في كل أنحاء المغرب" },
+      "returns":  { "title": "إرجاع سهل", "sub": "30 يومًا لتغيير رأيك" },
+      "secure":   { "title": "دفع آمن", "sub": "معتمد CMI وPCI DSS" }
+    }
+  },
+  "product": {
+    "addToCart": "أضف إلى السلة",
+    "buyNow": "اشتري الآن",
+    "outOfStock": "نفد من المخزون",
+    "inStock": "متوفر",
+    "reviews": "{count} تقييم",
+    "vendor": "يُباع من قِبل",
+    "delivery": "التوصيل",
+    "freeDelivery": "توصيل مجاني",
+    "returnPolicy": "الإرجاع خلال 30 يومًا",
+    "share": "مشاركة",
+    "shareWhatsApp": "مشاركة عبر واتساب",
+    "wishlist": "إضافة إلى المفضلة",
+    "description": "الوصف",
+    "details": "المواصفات",
+    "reviews_tab": "آراء العملاء",
+    "similar": "منتجات مشابهة",
+    "quantity": "الكمية",
+    "color": "اللون",
+    "size": "المقاس",
+    "material": "المادة",
+    "sku": "المرجع",
+    "from": "ابتداءً من"
+  },
+  "cart": {
+    "title": "سلة التسوق",
+    "empty": "سلتك فارغة",
+    "emptySubtitle": "اكتشف منتجاتنا وابدأ تسوقك",
+    "continueShopping": "متابعة التسوق",
+    "total": "المجموع",
+    "subtotal": "المجموع الفرعي",
+    "delivery": "التوصيل",
+    "deliveryFree": "مجاني",
+    "deliveryCalculated": "يُحسب في الخطوة التالية",
+    "discount": "الخصم",
+    "promoCode": "رمز الترويج",
+    "applyCode": "تطبيق",
+    "promoPlaceholder": "أدخل الرمز",
+    "checkout": "إتمام الطلب",
+    "remove": "حذف",
+    "items": "{count} عنصر",
+    "byVendor": "يُباع من",
+    "freeDeliveryFrom": "توصيل مجاني من 300 درهم"
+  },
+  "checkout": {
+    "title": "إتمام الطلب",
+    "steps": {
+      "address": "العنوان",
+      "delivery": "التوصيل",
+      "payment": "الدفع"
+    },
+    "address": {
+      "title": "عنوان التوصيل",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "phone": "الهاتف",
+      "phonePlaceholder": "06XXXXXXXX",
+      "city": "المدينة",
+      "address": "العنوان الكامل",
+      "zipCode": "الرمز البريدي",
+      "saveAddress": "حفظ هذا العنوان"
+    },
+    "delivery": {
+      "title": "طريقة التوصيل",
+      "standard": "عادي",
+      "express": "سريع",
+      "relay": "نقطة استلام"
+    },
+    "payment": {
+      "title": "طريقة الدفع",
+      "cod": "الدفع عند الاستلام",
+      "codSub": "ادفع نقدًا عند استلام طلبك",
+      "card": "البطاقة البنكية (CMI)",
+      "cardSub": "فيزا، ماستركارد — آمن PCI DSS",
+      "mobile": "موبايل موني",
+      "mobileSub": "Inwi Money، Orange Money، M-Wallet",
+      "transfer": "تحويل بنكي",
+      "cash": "CashPlus / Wafacash"
+    },
+    "summary": "ملخص الطلب",
+    "placeOrder": "تأكيد الطلب",
+    "next": "الخطوة التالية",
+    "back": "رجوع",
+    "orderConfirmed": "تم تأكيد الطلب!",
+    "orderNumber": "رقم الطلب: {number}"
+  },
+  "auth": {
+    "login": {
+      "title": "تسجيل الدخول",
+      "subtitle": "مرحبًا بعودتك إلى سوق الرقمي",
+      "emailOrPhone": "البريد الإلكتروني أو الهاتف",
+      "password": "كلمة المرور",
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "submit": "تسجيل الدخول",
+      "noAccount": "ليس لديك حساب؟",
+      "registerLink": "إنشاء حساب مجاني",
+      "or": "أو تابع باستخدام",
+      "google": "جوجل",
+      "facebook": "فيسبوك"
+    },
+    "register": {
+      "title": "إنشاء حساب",
+      "subtitle": "انضم إلى أكثر من 50,000 مشترٍ في سوق الرقمي",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف المغربي",
+      "phonePlaceholder": "+212 6XX XXX XXX",
+      "password": "كلمة المرور",
+      "passwordHint": "8 أحرف على الأقل",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "submit": "إنشاء حسابي",
+      "hasAccount": "لديك حساب بالفعل؟",
+      "loginLink": "تسجيل الدخول",
+      "terms": "بإنشاء حساب، فإنك توافق على",
+      "termsLink": "شروط الاستخدام",
+      "and": "و",
+      "privacyLink": "سياسة الخصوصية",
+      "becomeVendor": "هل أنت بائع؟ أنشئ متجرك"
+    },
+    "otp": {
+      "title": "التحقق برسالة SMS",
+      "subtitle": "تم إرسال رمز إلى {phone}",
+      "placeholder": "_ _ _ _ _ _",
+      "verify": "تحقق",
+      "resend": "إعادة إرسال الرمز",
+      "resendIn": "إعادة الإرسال خلال {seconds} ثانية"
+    }
+  },
+  "vendor": {
+    "products": "المنتجات",
+    "reviews": "التقييمات",
+    "followers": "المتابعون",
+    "rating": "التقييم",
+    "verified": "بائع موثوق",
+    "artisan": "حرفي معتمد",
+    "contact": "تواصل",
+    "follow": "متابعة",
+    "unfollow": "إلغاء المتابعة",
+    "allProducts": "جميع المنتجات",
+    "since": "عضو منذ",
+    "location": "الموقع",
+    "responseTime": "يرد في أقل من {time}",
+    "topSeller": "أفضل بائع"
+  },
+  "filters": {
+    "title": "التصفية",
+    "price": "السعر (درهم)",
+    "priceMin": "الحد الأدنى",
+    "priceMax": "الحد الأقصى",
+    "category": "الفئة",
+    "rating": "أدنى تقييم",
+    "freeDelivery": "توصيل مجاني",
+    "inStock": "متوفر",
+    "artisan": "صناعة تقليدية أصيلة",
+    "city": "المدينة",
+    "apply": "تطبيق",
+    "reset": "إعادة تعيين",
+    "results": "{count} نتيجة"
+  },
+  "sort": {
+    "label": "ترتيب حسب",
+    "relevance": "الصلة",
+    "priceAsc": "السعر: الأقل أولاً",
+    "priceDesc": "السعر: الأعلى أولاً",
+    "newest": "الأحدث",
+    "rating": "الأعلى تقييمًا",
+    "popular": "الشعبية"
+  },
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ ما",
+    "retry": "إعادة المحاولة",
+    "viewAll": "عرض الكل",
+    "seeMore": "عرض المزيد",
+    "close": "إغلاق",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "search": "بحث",
+    "filter": "تصفية",
+    "sort": "ترتيب",
+    "currency": "درهم",
+    "free": "مجاني",
+    "new": "جديد",
+    "sale": "عرض",
+    "topSeller": "الأكثر مبيعًا",
+    "artisanBadge": "صناعة تقليدية أصيلة",
+    "stars": "{count} نجوم",
+    "off": "-{percent}٪",
+    "from": "ابتداءً من",
+    "by": "من",
+    "in": "في",
+    "and": "و",
+    "or": "أو",
+    "required": "إلزامي",
+    "optional": "اختياري"
+  },
+  "categories": {
+    "electronics": "الإلكترونيات والهواتف",
+    "fashion": "الأزياء والملابس",
+    "artisan": "الصناعة التقليدية المغربية",
+    "beauty": "الجمال والصحة",
+    "home": "المنزل والديكور",
+    "food": "الغذاء والمنتجات المحلية",
+    "sports": "الرياضة والترفيه",
+    "auto": "السيارات والدراجات",
+    "baby": "الأطفال والرضع",
+    "computer": "الحاسوب والمكتب",
+    "books": "الكتب والثقافة",
+    "services": "الخدمات"
+  }
+}

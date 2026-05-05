@@ -1,0 +1,282 @@
+{
+  "navigation": {
+    "home": "Aseggas",
+    "categories": "Tignatin",
+    "deals": "Tizmilin",
+    "vendors": "Inzzazen",
+    "cart": "Tazebga",
+    "login": "Kcem",
+    "register": "Err isem",
+    "profile": "Udem-inu",
+    "orders": "Tlallatin-inu",
+    "wishlist": "Imaranen",
+    "logout": "Ffeɣ",
+    "myAccount": "Amiḍan-inu",
+    "vendorSpace": "Aɣanim n unzzay",
+    "help": "Tallalt"
+  },
+  "search": {
+    "placeholder": "Nadi deg yinagan, asennan...",
+    "button": "Nadi",
+    "noResults": "Ulac igmaḍ i «{query}»",
+    "suggestions": "Tisurigin"
+  },
+  "homepage": {
+    "hero": {
+      "slide1Title": "Lfunun n Lmɣrib deg ufus-inek",
+      "slide1Subtitle": "Ssifrir sin waladɣ n inagan ibanen",
+      "slide1Cta": "Qim sdat",
+      "slide2Title": "Tizmilin n Ass",
+      "slide2Subtitle": "Ar 70% deg yinagan yettwaferzen",
+      "slide2Cta": "Wali tizmilin",
+      "slide3Title": "Tizlit deg Lmɣrib kull",
+      "slide3Subtitle": "24 ar 72 n tsaɛtin deg tengalin",
+      "slide3Cta": "Tlala tura"
+    },
+    "promoBanner": "🎉 Tizlit s yiman-is seg 300 DH · Ssafed deg tezlit deg Lmɣrib kull",
+    "flashSales": {
+      "title": "Tizmilin Tizeggaɣin",
+      "endsIn": "Tixsi deg",
+      "viewAll": "Wali akk",
+      "hours": "s",
+      "minutes": "d",
+      "seconds": "sn"
+    },
+    "categories": {
+      "title": "Tignatin-nneɣ",
+      "viewAll": "Wali tignatin akk"
+    },
+    "featuredProducts": {
+      "title": "Inagan Iɛezzan",
+      "viewAll": "Wali inagan akk"
+    },
+    "artisan": {
+      "title": "Lfunun Aqbayli",
+      "subtitle": "Yettwaseggem sɣur Lmekteb Aɣelnaw n Lfunun",
+      "badge": "Yettwaseggem",
+      "cta": "Ssifrir lfunun"
+    },
+    "vendors": {
+      "title": "Inzzazen Iɛezzan",
+      "viewAll": "Wali inzzazen akk"
+    },
+    "trust": {
+      "delivery": { "title": "Tizlit deg Lmɣrib", "sub": "24-72 n tsaɛtin deg tengalin" },
+      "cod":      { "title": "Ssafed deg tezlit", "sub": "Ittwasireg deg Lmɣrib akk" },
+      "returns":  { "title": "Tiririt s yiman-is", "sub": "30 n wussan ad tbeddlid tamrart-ik" },
+      "secure":   { "title": "Ssafed yettwaḥerzen", "sub": "Yettwaseggem CMI & PCI DSS" }
+    }
+  },
+  "product": {
+    "addToCart": "Rnu ɣer tazebga",
+    "buyNow": "Ɣer tura",
+    "outOfStock": "Ulac deg ukubar",
+    "inStock": "Yella",
+    "reviews": "{count} n tɣennajin",
+    "vendor": "Yettizzin sɣur",
+    "delivery": "Tizlit",
+    "freeDelivery": "Tizlit s yiman-is",
+    "returnPolicy": "Tiririt deg 30 n wussan",
+    "share": "Bḍu",
+    "shareWhatsApp": "Bḍu ɣer WhatsApp",
+    "wishlist": "Rnu ɣer imaranen",
+    "description": "Aglam",
+    "details": "Tizmilin",
+    "reviews_tab": "Tɣennajin n imsaɣen",
+    "similar": "Inagan yuḍnen",
+    "quantity": "Amḍan",
+    "color": "Ini",
+    "size": "Teɣzi",
+    "material": "Aɣbalu",
+    "sku": "Anumru",
+    "from": "Seg"
+  },
+  "cart": {
+    "title": "Tazebga-inu",
+    "empty": "Tazebga-inek d tarart",
+    "emptySubtitle": "Ssifrir inagan-nneɣ",
+    "continueShopping": "Err asaɣ",
+    "total": "Akk",
+    "subtotal": "Aferdis",
+    "delivery": "Tizlit",
+    "deliveryFree": "S yiman-is",
+    "deliveryCalculated": "Ittwaskar deg tɣimt-nniḍen",
+    "discount": "Asmikel",
+    "promoCode": "Tangalt n tsumlit",
+    "applyCode": "Smentu",
+    "promoPlaceholder": "Sekker tangalt",
+    "checkout": "Temmet tallalt",
+    "remove": "Kkes",
+    "items": "{count} n yinagan",
+    "byVendor": "Seg",
+    "freeDeliveryFrom": "Tizlit s yiman-is seg 300 DH"
+  },
+  "checkout": {
+    "title": "Temmet tallalt",
+    "steps": {
+      "address": "Tansa",
+      "delivery": "Tizlit",
+      "payment": "Ssafed"
+    },
+    "address": {
+      "title": "Tansa n tizlit",
+      "firstName": "Isem-ik",
+      "lastName": "Isem n tewsit",
+      "phone": "Tiliɣri",
+      "phonePlaceholder": "06XXXXXXXX",
+      "city": "Tamɣart",
+      "address": "Tansa tamellalt",
+      "zipCode": "Aziraz",
+      "saveAddress": "Sekker tansa-agi"
+    },
+    "delivery": {
+      "title": "Asafar n tizlit",
+      "standard": "Amezwaru",
+      "express": "Ameqqran",
+      "relay": "Tineqqiwin"
+    },
+    "payment": {
+      "title": "Asafar n ssafed",
+      "cod": "Ssafed deg tizlit",
+      "codSub": "Ssafed s ifranken deg tezlit",
+      "card": "Takart n tgelda (CMI)",
+      "cardSub": "Visa, Mastercard — yettwaḥerzen PCI DSS",
+      "mobile": "Mobile Money",
+      "mobileSub": "Inwi Money, Orange Money, M-Wallet",
+      "transfer": "Asneɣlem n tgelda",
+      "cash": "CashPlus / Wafacash"
+    },
+    "summary": "Aglam n tallalt",
+    "placeOrder": "Seggem tallalt",
+    "next": "Tɣimt-nniḍen",
+    "back": "Uɣal",
+    "orderConfirmed": "Tallalt tettwaseggem!",
+    "orderNumber": "Anumru n tallalt: {number}"
+  },
+  "auth": {
+    "login": {
+      "title": "Kcem",
+      "subtitle": "Ansuf ɣer Souk Digital",
+      "emailOrPhone": "Imayl neɣ tiliɣri",
+      "password": "Awal uffir",
+      "forgotPassword": "Tensitid awal uffir?",
+      "submit": "Kcem",
+      "noAccount": "Ulac amiḍan-ik?",
+      "registerLink": "Err isem s yiman-is",
+      "or": "neɣ serrew sɣur",
+      "google": "Google",
+      "facebook": "Facebook"
+    },
+    "register": {
+      "title": "Err amiḍan",
+      "subtitle": "Qqen ɣer wagrawen n 50,000 imsaɣ deg Souk Digital",
+      "firstName": "Isem-ik",
+      "lastName": "Isem n tewsit",
+      "email": "Tansa imayl",
+      "phone": "Tiliɣri n Lmɣrib",
+      "phonePlaceholder": "+212 6XX XXX XXX",
+      "password": "Awal uffir",
+      "passwordHint": "8 n wawalen-nniḍen",
+      "confirmPassword": "Sentem awal uffir",
+      "submit": "Err amiḍan-inu",
+      "hasAccount": "Yella-k amiḍan?",
+      "loginLink": "Kcem",
+      "terms": "S userred n umiḍan, tqebbelt",
+      "termsLink": "Tiwtilin n useqdec",
+      "and": "d",
+      "privacyLink": "Tasertit n tbaḍnit",
+      "becomeVendor": "D anzzay? Err amezruy-ik"
+    },
+    "otp": {
+      "title": "Asentem s SMS",
+      "subtitle": "Yuli-d urangal ɣer {phone}",
+      "placeholder": "_ _ _ _ _ _",
+      "verify": "Sentem",
+      "resend": "Uli-d urangal",
+      "resendIn": "Uli-d deg {seconds} n tsantin"
+    }
+  },
+  "vendor": {
+    "products": "Inagan",
+    "reviews": "Tɣennajin",
+    "followers": "Iteddawen",
+    "rating": "Azennan",
+    "verified": "Anzzay yettwaseggem",
+    "artisan": "Afunfur yettwaseggem",
+    "contact": "Meslay",
+    "follow": "Eddaw",
+    "unfollow": "Seḥbes",
+    "allProducts": "Inagan akk",
+    "since": "Amalay seg",
+    "location": "Amḍiq",
+    "responseTime": "Yerra deg {time}",
+    "topSeller": "Anzzay n umazdar"
+  },
+  "filters": {
+    "title": "Asfersed",
+    "price": "Tazwara (DH)",
+    "priceMin": "Amezwaru",
+    "priceMax": "Ameqqran",
+    "category": "Tanɣilt",
+    "rating": "Azennan afella",
+    "freeDelivery": "Tizlit s yiman-is",
+    "inStock": "Yella",
+    "artisan": "Lfunun aqbayli",
+    "city": "Tamɣart",
+    "apply": "Smentu",
+    "reset": "Sifru",
+    "results": "{count} n tɣennajin"
+  },
+  "sort": {
+    "label": "Wranted sɣur",
+    "relevance": "Tuqna",
+    "priceAsc": "Tazwara: tamecṭuḥt",
+    "priceDesc": "Tazwara: tameqqrant",
+    "newest": "Amaynut",
+    "rating": "Azennan aɛla",
+    "popular": "Asmezzeɣ"
+  },
+  "common": {
+    "loading": "Itellef...",
+    "error": "Yuɣal-d ugellid",
+    "retry": "Err tikelt-nniḍen",
+    "viewAll": "Wali akk",
+    "seeMore": "Wali ugar",
+    "close": "Mdel",
+    "save": "Sekker",
+    "cancel": "Seḥbes",
+    "confirm": "Seggem",
+    "search": "Nadi",
+    "filter": "Sfersed",
+    "sort": "Wranted",
+    "currency": "DH",
+    "free": "S yiman-is",
+    "new": "Amaynut",
+    "sale": "Tizmilt",
+    "topSeller": "Asmezzeɣ aɛla",
+    "artisanBadge": "Lfunun Aqbayli",
+    "stars": "{count} n yiɣeẓran",
+    "off": "-{percent}٪",
+    "from": "Seg",
+    "by": "sɣur",
+    "in": "deg",
+    "and": "d",
+    "or": "neɣ",
+    "required": "Ixeṣṣa",
+    "optional": "Ur ixeṣṣi"
+  },
+  "categories": {
+    "electronics": "Tiliẓri d Itiliɣriyen",
+    "fashion": "Aɣerbaz d Ilebsan",
+    "artisan": "Lfunun n Lmɣrib",
+    "beauty": "Tazuɣɣurt d Tasnilest",
+    "home": "Axxam d Azemmem",
+    "food": "Taɣect d Inagan n Tmurt",
+    "sports": "Tiɣriwin d Tigawtin",
+    "auto": "Tumensiwin",
+    "baby": "Tarwa d Isɣaren",
+    "computer": "Umihal d Biru",
+    "books": "Idlisen d Tameddurt",
+    "services": "Tirmitin"
+  }
+}
