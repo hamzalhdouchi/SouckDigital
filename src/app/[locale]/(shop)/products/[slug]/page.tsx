@@ -26,8 +26,47 @@ export default function ProductDetailPage() {
   const slug   = params.slug as string;
   const isAr   = locale === "ar";
 
-  const product = MOCK_PRODUCTS.find((p) => p.slug === slug) ?? MOCK_PRODUCTS[0];
-  const relatedProducts = MOCK_PRODUCTS.filter((p) => p.id !== product.id).slice(0, 4);
+  // Try real API first, fall back to mock data when API unavailable
+  let productData: typeof MOCK_PRODUCTS[0] | null = null;
+  let relatedData: typeof MOCK_PRODUCTS = [];
+
+  try {
+    const { getProductBySlug, getRelatedProducts } = await import("@/lib/api/products");
+    const [apiProduct, apiRelated] = await Promise.allSettled([
+      getProductBySlug(slug),
+      getProductBySlug(slug).then((p) => getRelatedProducts(p.id)),
+    ]);
+    if (apiProduct.status === "fulfilled") {
+      const p = apiProduct.value;
+      productData = {
+        id: p.id, slug: p.slug, name: p.name, nameAr: p.nameAr,
+        price: p.price, originalPrice: p.originalPrice ?? p.price,
+        image: p.image ?? "", images: p.images,
+        rating: p.rating, reviewCount: p.reviewCount,
+        vendor: { id: p.vendor.id, name: p.vendor.name, slug: p.vendor.slug, verified: p.vendor.verified, artisan: p.vendor.artisan },
+        category: p.category?.name ?? "",
+        badge: p.badge as "artisan" | "sale" | "new_" | "top" | "flash",
+        inStock: p.inStock, stockCount: p.stockCount ?? 0,
+        city: p.city, freeDelivery: p.freeDelivery,
+      };
+    }
+    if (apiRelated.status === "fulfilled") {
+      relatedData = apiRelated.value.map((p) => ({
+        id: p.id, slug: p.slug, name: p.name, nameAr: p.nameAr,
+        price: p.price, originalPrice: p.originalPrice ?? p.price,
+        image: p.image ?? "", images: [p.image ?? ""],
+        rating: p.rating, reviewCount: p.reviewCount,
+        vendor: { id: p.vendor.id, name: p.vendor.name, slug: p.vendor.slug, verified: p.vendor.verified, artisan: p.vendor.artisan },
+        category: "", badge: p.badge as "artisan", inStock: p.inStock, stockCount: 0,
+        city: p.city, freeDelivery: p.freeDelivery,
+      }));
+    }
+  } catch { /* API unavailable — use mock data below */ }
+
+  const product = productData ?? MOCK_PRODUCTS.find((p) => p.slug === slug) ?? MOCK_PRODUCTS[0];
+  const relatedProducts = relatedData.length > 0
+    ? relatedData
+    : MOCK_PRODUCTS.filter((p) => p.id !== product.id).slice(0, 4);
 
   const [mainImage,     setMainImage]     = useState(0);
   const [lightboxOpen,  setLightboxOpen]  = useState(false);

@@ -10,6 +10,9 @@ import VendorCard from "@/components/modules/vendor-card";
 import FlashTimer from "@/components/modules/flash-timer";
 import Button from "@/components/ui/button";
 import { MOCK_CATEGORIES, MOCK_PRODUCTS, MOCK_FLASH_PRODUCTS, MOCK_VENDORS } from "@/lib/mock-data";
+import { getCategories, getProducts } from "@/lib/api/products";
+import { getVendors } from "@/lib/api/vendors";
+import type { ProductSummaryDto, VendorSummaryDto } from "@/lib/api/types";
 
 interface Props { params: Promise<{ locale: string }> }
 
@@ -24,14 +27,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
 
+  // Fetch live data — fall back to mock on error (e.g. API not running locally)
+  const [categoriesRes, productsRes, vendorsRes] = await Promise.allSettled([
+    getCategories(),
+    getProducts({ page: 0, size: 8, sort: "newest" }),
+    getVendors({ size: 4 }),
+  ]);
+
+  const categories = categoriesRes.status === "fulfilled" ? categoriesRes.value : null;
+  const products   = productsRes.status   === "fulfilled" ? productsRes.value.content : null;
+  const vendors    = vendorsRes.status    === "fulfilled" ? vendorsRes.value.content : null;
+
   return (
     <div className="min-h-screen">
       <HeroSection locale={locale} />
-      <CategorySection locale={locale} />
+      <CategorySection locale={locale} apiCategories={categories} />
       <FlashSaleSection locale={locale} />
-      <FeaturedProductsSection locale={locale} />
+      <FeaturedProductsSection locale={locale} apiProducts={products} />
       <ArtisanSection locale={locale} />
-      <VendorSection locale={locale} />
+      <VendorSection locale={locale} apiVendors={vendors} />
       <TrustSection locale={locale} />
     </div>
   );
@@ -125,8 +139,12 @@ function HeroSection({ locale }: { locale: string }) {
 }
 
 /* ────────────── Categories ────────────── */
-function CategorySection({ locale }: { locale: string }) {
+function CategorySection({ locale, apiCategories }: {
+  locale: string;
+  apiCategories: { id: string; slug: string; name: string; nameAr: string; emoji: string; imageUrl: string | null }[] | null;
+}) {
   const isAr = locale === "ar";
+  const cats = apiCategories ?? MOCK_CATEGORIES.map((c) => ({ ...c, imageUrl: c.image }));
   return (
     <section className="py-10 max-w-7xl mx-auto px-4">
       <SectionHeader
@@ -135,13 +153,13 @@ function CategorySection({ locale }: { locale: string }) {
         viewAllLabel={isAr ? "عرض الكل" : "Voir tout"}
       />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {MOCK_CATEGORIES.map((cat) => (
+        {cats.map((cat) => (
           <CategoryCard
             key={cat.id}
             slug={cat.slug}
             name={isAr ? cat.nameAr : cat.name}
             emoji={cat.emoji}
-            image={cat.image}
+            image={cat.imageUrl ?? ""}
             locale={locale}
             size="md"
           />
@@ -210,8 +228,16 @@ function calculateFlashDiscount(original: number, sale: number) {
 }
 
 /* ────────────── Featured Products ────────────── */
-function FeaturedProductsSection({ locale }: { locale: string }) {
+function FeaturedProductsSection({ locale, apiProducts }: {
+  locale: string;
+  apiProducts: ProductSummaryDto[] | null;
+}) {
   const isAr = locale === "ar";
+  const items = apiProducts ?? MOCK_PRODUCTS.map((p) => ({
+    ...p, image: p.image, originalPrice: p.originalPrice !== p.price ? p.originalPrice : null,
+    vendor: { ...p.vendor, artisan: p.vendor.artisan, verified: p.vendor.verified },
+    badge: p.badge as string, city: p.city, inStock: p.inStock,
+  }));
   return (
     <section className="py-10 max-w-7xl mx-auto px-4">
       <SectionHeader
@@ -220,19 +246,19 @@ function FeaturedProductsSection({ locale }: { locale: string }) {
         viewAllLabel={isAr ? "عرض الكل" : "Voir tout"}
       />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {MOCK_PRODUCTS.map((p) => (
+        {items.map((p) => (
           <ProductCard
             key={p.id}
             id={p.id}
             slug={p.slug}
             name={isAr ? p.nameAr : p.name}
             price={p.price}
-            originalPrice={p.originalPrice !== p.price ? p.originalPrice : undefined}
-            image={p.image}
+            originalPrice={p.originalPrice ?? undefined}
+            image={p.image ?? ""}
             rating={p.rating}
             reviewCount={p.reviewCount}
             vendor={p.vendor}
-            badge={p.badge}
+            badge={p.badge as "artisan" | "sale" | "new_" | "top" | "flash" | undefined}
             inStock={p.inStock}
             freeDelivery={p.freeDelivery}
             locale={locale}
@@ -286,8 +312,14 @@ function ArtisanSection({ locale }: { locale: string }) {
 }
 
 /* ────────────── Vendors ────────────── */
-function VendorSection({ locale }: { locale: string }) {
+function VendorSection({ locale, apiVendors }: {
+  locale: string;
+  apiVendors: VendorSummaryDto[] | null;
+}) {
   const isAr = locale === "ar";
+  const items = apiVendors ?? MOCK_VENDORS.map((v) => ({
+    ...v, avatarUrl: v.avatar, bannerUrl: v.banner, nameAr: "",
+  }));
   return (
     <section className="py-10 max-w-7xl mx-auto px-4">
       <SectionHeader
@@ -296,8 +328,22 @@ function VendorSection({ locale }: { locale: string }) {
         viewAllLabel={isAr ? "عرض الكل" : "Voir tout"}
       />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {MOCK_VENDORS.map((v) => (
-          <VendorCard key={v.id} {...v} locale={locale} />
+        {items.map((v) => (
+          <VendorCard
+            key={v.id}
+            id={v.id}
+            slug={v.slug}
+            name={v.name}
+            city={v.city}
+            rating={v.rating}
+            reviewCount={v.reviewCount}
+            productCount={v.productCount}
+            artisan={v.artisan}
+            verified={v.verified}
+            avatar={v.avatarUrl ?? undefined}
+            banner={v.bannerUrl ?? undefined}
+            locale={locale}
+          />
         ))}
       </div>
     </section>

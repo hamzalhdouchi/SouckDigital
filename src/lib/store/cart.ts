@@ -26,7 +26,7 @@ interface CartStore {
   addItem: (item: Omit<CartItem, "quantity">) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
-  applyPromo: (code: string) => boolean;
+  applyPromo: (code: string) => Promise<boolean>;
   clearCart: () => void;
   total: () => number;
   subtotal: () => number;
@@ -71,15 +71,11 @@ export const useCartStore = create<CartStore>()(
         }));
       },
 
-      applyPromo: (code) => {
-        const validCodes: Record<string, number> = {
-          SOUK10: 10,
-          ARTISAN20: 20,
-          BIENVENUE15: 15,
-        };
-        const discount = validCodes[code.toUpperCase()];
-        if (discount) {
-          set({ promoCode: code, discount });
+      applyPromo: async (code) => {
+        const { validatePromo } = await import("@/lib/api/orders");
+        const res = await validatePromo(code);
+        if (res.valid && res.discountPercent != null) {
+          set({ promoCode: res.code ?? code, discount: res.discountPercent });
           return true;
         }
         return false;

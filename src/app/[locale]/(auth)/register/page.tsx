@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Phone, User, Lock, ArrowRight, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, Mail, Phone, User, Lock, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { useAuthStore } from "@/lib/store/auth";
@@ -15,12 +15,15 @@ export default function RegisterPage() {
   const locale = params.locale as string;
   const router = useRouter();
   const isAr = locale === "ar";
-  const login = useAuthStore((s) => s.login);
+  const apiRegister = useAuthStore((s) => s.apiRegister);
+  const apiVerifyOtp = useAuthStore((s) => s.apiVerifyOtp);
 
   const [step, setStep] = useState<Step>("form");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [pendingUserId, setPendingUserId] = useState("");
 
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "",
@@ -31,22 +34,41 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (form.password !== form.confirmPassword) {
+      setError(isAr ? "كلمتا المرور غير متطابقتين" : "Les mots de passe ne correspondent pas");
+      return;
+    }
+    setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-    setStep("otp");
+    try {
+      const res = await apiRegister({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+      });
+      setPendingUserId(res.id);
+      setStep("otp");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : (isAr ? "حدث خطأ" : "Une erreur s'est produite"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    login(
-      { id: "u-new", firstName: form.firstName, lastName: form.lastName, email: form.email, phone: form.phone, role: "buyer", isVerified: true },
-      "mock-token-new"
-    );
-    setLoading(false);
-    router.push(`/${locale}`);
+    try {
+      await apiVerifyOtp({ userId: pendingUserId, code: otp.join("") });
+      router.push(`/${locale}`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : (isAr ? "رمز غير صحيح" : "Code incorrect"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOtpInput = (i: number, val: string) => {
@@ -87,6 +109,7 @@ export default function RegisterPage() {
                 />
               ))}
             </div>
+            {error && <p className="text-sm text-red-500 flex items-center justify-center gap-1.5 mb-3"><AlertCircle size={14} />{error}</p>}
             <Button type="submit" fullWidth size="lg" loading={loading} leftIcon={<CheckCircle size={18} />}>
               {isAr ? "تحقق" : "Vérifier le code"}
             </Button>
@@ -171,6 +194,8 @@ export default function RegisterPage() {
               {isAr ? "سياسة الخصوصية" : "Politique de confidentialité"}
             </Link>
           </p>
+
+          {error && <p className="text-sm text-red-500 flex items-center justify-center gap-1.5"><AlertCircle size={14} />{error}</p>}
 
           <Button type="submit" fullWidth size="lg" loading={loading} rightIcon={<ArrowRight size={18} />}>
             {isAr ? "إنشاء حسابي" : "Créer mon compte"}

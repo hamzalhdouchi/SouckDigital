@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle, ChevronRight, Truck, CreditCard, Smartphone, Building2, Banknote, Zap, Package } from "lucide-react";
+import { CheckCircle, ChevronRight, Truck, CreditCard, Smartphone, Building2, Banknote, Zap, Package, AlertCircle } from "lucide-react";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { useCartStore } from "@/lib/store/cart";
 import { cn, formatPriceSimple } from "@/lib/utils";
+import type { PlaceOrderRequest } from "@/lib/api/types";
 
 type Step = 1 | 2 | 3;
 
@@ -25,14 +26,25 @@ const PAYMENT_METHODS = [
   { id: "transfer", icon: Building2,   label: "Virement bancaire",          sub: "Confirmation sous 24h",            popular: false },
 ];
 
+const PAYMENT_METHOD_MAP: Record<string, PlaceOrderRequest["paymentMethod"]> = {
+  cod: "COD",
+  card: "CARD_CMI",
+  mobile: "MOBILE",
+  transfer: "TRANSFER",
+};
+
 export default function CheckoutPage() {
   const params = useParams();
   const locale = params.locale as string;
+  const router = useRouter();
   const isAr = locale === "ar";
 
-  const { items, subtotal, total, discount } = useCartStore();
+  const { items, subtotal, total, discount, promoCode, clearCart } = useCartStore();
   const [step, setStep] = useState<Step>(1);
   const [confirmed, setConfirmed] = useState(false);
+  const [confirmedOrderId, setConfirmedOrderId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const [address, setAddress] = useState({ firstName: "", lastName: "", phone: "", city: "", street: "", zip: "" });
   const [deliveryMethod, setDeliveryMethod] = useState("standard");
@@ -60,7 +72,7 @@ export default function CheckoutPage() {
           {isAr ? "تم تأكيد الطلب!" : "Commande confirmée !"}
         </h1>
         <p className="text-gray-600 mb-2">
-          {isAr ? "رقم الطلب:" : "Numéro de commande :"} <strong>#SD-{Math.random().toString(36).slice(2, 8).toUpperCase()}</strong>
+          {isAr ? "رقم الطلب:" : "Numéro de commande :"} <strong>#{confirmedOrderId.slice(0, 8).toUpperCase()}</strong>
         </p>
         <p className="text-sm text-gray-500 mb-8 max-w-md">
           {isAr
@@ -219,9 +231,46 @@ export default function CheckoutPage() {
                 </div>
               )}
 
+              {submitError && (
+                <p className="text-sm text-red-500 flex items-center gap-1.5 mb-3">
+                  <AlertCircle size={14} />{submitError}
+                </p>
+              )}
               <div className="flex justify-between">
                 <Button variant="outline" onClick={() => setStep(2)}>Retour</Button>
-                <Button variant="gold" size="lg" onClick={() => setConfirmed(true)} leftIcon={<CheckCircle size={18} />}>
+                <Button
+                  variant="gold"
+                  size="lg"
+                  loading={submitting}
+                  onClick={async () => {
+                    setSubmitError("");
+                    setSubmitting(true);
+                    try {
+                      const { placeOrder } = await import("@/lib/api/orders");
+                      const order = await placeOrder({
+                        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+                        address: {
+                          firstName: address.firstName,
+                          lastName: address.lastName,
+                          phone: address.phone,
+                          street: address.street,
+                          city: address.city,
+                          zipCode: address.zip || undefined,
+                        },
+                        paymentMethod: PAYMENT_METHOD_MAP[paymentMethod] ?? "COD",
+                        promoCode: promoCode ?? undefined,
+                      });
+                      clearCart();
+                      setConfirmedOrderId(order.id);
+                      setConfirmed(true);
+                    } catch (err: unknown) {
+                      setSubmitError(err instanceof Error ? err.message : (isAr ? "فشل تأكيد الطلب" : "Échec de la commande"));
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                  leftIcon={<CheckCircle size={18} />}
+                >
                   {isAr ? "تأكيد الطلب" : "Confirmer la commande"} · {formatPriceSimple(grandTotal)}
                 </Button>
               </div>

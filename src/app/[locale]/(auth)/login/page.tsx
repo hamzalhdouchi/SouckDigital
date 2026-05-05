@@ -15,7 +15,7 @@ export default function LoginPage() {
   const router = useRouter();
   const isAr = locale === "ar";
 
-  const login = useAuthStore((s) => s.login);
+  const apiLogin = useAuthStore((s) => s.apiLogin);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -26,13 +26,15 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    login(
-      { id: "u1", firstName: "Fatima", lastName: "Bennani", email: identifier, phone: "0612345678", role: "buyer", isVerified: true },
-      "mock-token"
-    );
-    setLoading(false);
-    router.push(`/${locale}`);
+    try {
+      await apiLogin({ identifier, password });
+      router.push(`/${locale}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : (isAr ? "بيانات غير صحيحة" : "Identifiants incorrects");
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
