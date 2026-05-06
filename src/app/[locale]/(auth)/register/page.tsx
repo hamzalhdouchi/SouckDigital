@@ -48,8 +48,7 @@ export default function RegisterPage() {
         phone: form.phone,
         password: form.password,
       });
-      setPendingUserId(res.id);
-      setStep("otp");
+      router.push(`/${locale}/verify-otp?phone=${encodeURIComponent(form.phone)}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : (isAr ? "حدث خطأ" : "Une erreur s'est produite"));
     } finally {
@@ -62,7 +61,7 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
     try {
-      await apiVerifyOtp({ userId: pendingUserId, code: otp.join("") });
+      await apiVerifyOtp({ phone: form.phone, code: otp.join("") });
       router.push(`/${locale}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : (isAr ? "رمز غير صحيح" : "Code incorrect"));

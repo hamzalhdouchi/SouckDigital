@@ -3,6 +3,23 @@
 import { ApiError } from "@/lib/api/client";
 import Button from "./button";
 
+// Inline form-level error display (used inside forms)
+export function ApiErrorDisplay({ error }: { error: ApiError | null | undefined }) {
+  if (!error) return null;
+  return (
+    <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <p className="font-medium">{error.message}</p>
+      {error.errors && Object.keys(error.errors).length > 0 && (
+        <ul className="mt-2 list-disc pl-4 space-y-1">
+          {Object.entries(error.errors).map(([field, msg]) => (
+            <li key={field}>{msg}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 interface Props {
   error: unknown;
   onRetry?: () => void;

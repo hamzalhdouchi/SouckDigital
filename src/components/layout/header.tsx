@@ -3,10 +3,11 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, ShoppingCart, User, Menu, MapPin, ChevronDown, Heart, Phone, Tag } from "lucide-react";
+import { ShoppingCart, User, Menu, MapPin, ChevronDown, Heart, Phone, Tag } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useUIStore } from "@/lib/store/ui";
 import { useAuthStore } from "@/lib/store/auth";
+import { SearchBar } from "@/components/modules/search-bar";
 import { cn } from "@/lib/utils";
 
 const LOCALES = [
@@ -66,26 +67,7 @@ export default function Header({ locale }: HeaderProps) {
 
         {/* Search bar */}
         <div className="flex-1 max-w-2xl mx-auto hidden sm:flex">
-          <div className="relative w-full flex">
-            <input
-              type="search"
-              placeholder={ts("placeholder")}
-              className={cn(
-                "w-full h-10 bg-souk-sand border border-gray-200 text-sm px-4",
-                "focus:outline-none focus:ring-2 focus:ring-souk-gold-500 focus:border-transparent",
-                "placeholder:text-gray-400",
-                isRTL ? "rounded-e-lg" : "rounded-s-lg"
-              )}
-            />
-            <button className={cn(
-              "h-10 px-4 bg-souk-green-800 text-white text-sm font-medium flex items-center gap-2",
-              "hover:bg-souk-green-700 transition-colors",
-              isRTL ? "rounded-s-lg" : "rounded-e-lg"
-            )}>
-              <Search size={16} />
-              <span className="hidden md:inline">{ts("button")}</span>
-            </button>
-          </div>
+          <SearchBar locale={locale} isRTL={isRTL} placeholder={ts("placeholder")} />
         </div>
 
         {/* Right actions */}

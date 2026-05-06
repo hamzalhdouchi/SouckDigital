@@ -1,50 +1,43 @@
-import { get } from "./client";
+import { del, get, patch, post, put } from "./client";
 import type {
+  CreateProductRequest,
   Page,
   ProductDetailDto,
   ProductFilterRequest,
   ProductSummaryDto,
-  SearchRequest,
-  SearchResultsDto,
 } from "./types";
 
-function toQuery(params: Record<string, unknown>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v !== undefined && v !== null && v !== "") q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : "";
+function toQuery(filters: Record<string, unknown>): string {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") params.set(k, String(v));
+  });
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
 }
 
-export function getProducts(filters: ProductFilterRequest = {}) {
-  return get<Page<ProductSummaryDto>>(`/products${toQuery(filters as Record<string, unknown>)}`);
-}
+export const productsApi = {
+  getAll: (filters: ProductFilterRequest = {}) =>
+    get<Page<ProductSummaryDto>>(`/products${toQuery(filters as Record<string, unknown>)}`),
 
-export function getProductBySlug(slug: string) {
-  return get<ProductDetailDto>(`/products/${slug}`);
-}
+  getBySlug: (slug: string) => get<ProductDetailDto>(`/products/${slug}`),
 
-export function getRelatedProducts(id: string) {
-  return get<ProductSummaryDto[]>(`/products/${id}/related`);
-}
+  getRelated: (id: string) => get<ProductSummaryDto[]>(`/products/${id}/related`),
 
-export function searchProducts(params: SearchRequest) {
-  return get<SearchResultsDto>(`/search${toQuery(params as Record<string, unknown>)}`);
-}
+  create: (data: CreateProductRequest) => post<ProductDetailDto>("/products", data),
 
-export function getSearchSuggestions(q: string) {
-  return get<string[]>(`/search/suggestions?q=${encodeURIComponent(q)}`);
-}
+  update: (id: string, data: Partial<CreateProductRequest>) =>
+    put<ProductDetailDto>(`/products/${id}`, data),
 
-export function getCategories() {
-  return get<{ id: string; slug: string; name: string; nameAr: string; emoji: string; imageUrl: string | null }[]>("/categories");
-}
+  delete: (id: string) => del<void>(`/products/${id}`),
 
-export function getCategoryBySlug(slug: string) {
-  return get<{ id: string; slug: string; name: string; nameAr: string }>(`/categories/${slug}`);
-}
+  toggleActive: (id: string) => patch<ProductDetailDto>(`/products/${id}/toggle`),
+};
 
-export function getCategoryProducts(slug: string, page = 0, size = 20) {
-  return get<Page<ProductSummaryDto>>(`/categories/${slug}/products?page=${page}&size=${size}`);
-}
+// Legacy named exports (keep for backward compat with existing pages)
+export const getProducts = productsApi.getAll;
+export const getProductBySlug = productsApi.getBySlug;
+export const getRelatedProducts = productsApi.getRelated;
+
+// Re-export categories for pages that import from products
+export { categoriesApi, getCategories, getCategoryBySlug, getCategoryProducts } from "./categories-legacy";

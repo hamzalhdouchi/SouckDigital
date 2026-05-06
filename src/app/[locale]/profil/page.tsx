@@ -114,7 +114,7 @@ export default function ProfilePage() {
         </div>
         <div className="relative flex items-center gap-4">
           <div className="h-16 w-16 rounded-2xl bg-souk-gold-500/20 border-2 border-souk-gold-500/40 flex items-center justify-center text-2xl font-black text-souk-gold-400">
-            {user.firstName?.[0] ?? user.email[0].toUpperCase()}
+            {user.firstName?.[0] ?? (user.email ?? "?")[0].toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-black">
@@ -320,7 +320,7 @@ function WishlistTab({ isAr, locale }: { isAr: boolean; locale: string }) {
   );
 }
 
-function SettingsTab({ isAr, user }: { isAr: boolean; user: { email: string; firstName?: string; lastName?: string; phone?: string } }) {
+function SettingsTab({ isAr, user }: { isAr: boolean; user: { email: string | null; firstName?: string; lastName?: string; phone?: string } }) {
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-bold text-gray-900">{isAr ? "الإعدادات الشخصية" : "Paramètres du compte"}</h2>
@@ -332,7 +332,7 @@ function SettingsTab({ isAr, user }: { isAr: boolean; user: { email: string; fir
           {[
             { label: isAr ? "الاسم الأول" : "Prénom", value: user.firstName ?? "", placeholder: "Mohammed" },
             { label: isAr ? "الاسم الأخير" : "Nom", value: user.lastName ?? "", placeholder: "Alami" },
-            { label: isAr ? "البريد الإلكتروني" : "Email", value: user.email, placeholder: "email@example.com" },
+            { label: isAr ? "البريد الإلكتروني" : "Email", value: user.email ?? "", placeholder: "email@example.com" },
             { label: isAr ? "الهاتف" : "Téléphone", value: user.phone ?? "", placeholder: "06XXXXXXXX" },
           ].map(({ label, value, placeholder }) => (
             <div key={label}>

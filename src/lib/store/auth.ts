@@ -2,28 +2,27 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { LoginRequest, OtpVerifyRequest, RegisterRequest } from "@/lib/api/types";
+import { useEffect, useState } from "react";
+import type { AuthResponse, LoginRequest, OtpVerifyRequest, RegisterRequest, UserDto } from "@/lib/api/types";
 
-export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  phone: string;
-  avatar?: string | null;
-  role: "BUYER" | "VENDOR" | "ADMIN";
-  isVerified: boolean;
-}
+// User type that mirrors UserDto (used by legacy pages)
+export type User = UserDto;
 
 interface AuthStore {
-  user: User | null;
+  user: UserDto | null;
   token: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
-  login: (user: User, token: string, refreshToken?: string) => void;
+
+  // MD-spec actions
+  setAuth: (response: AuthResponse) => void;
+  setTokens: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
-  updateUser: (data: Partial<User>) => void;
-  apiRegister: (data: RegisterRequest) => Promise<{ id: string; message: string }>;
+  updateUser: (user: UserDto) => void;
+
+  // Legacy actions used by existing pages
+  login: (user: UserDto, token: string, refreshToken?: string) => void;
+  apiRegister: (data: RegisterRequest) => Promise<{ userId?: string; id?: string; message: string }>;
   apiVerifyOtp: (data: OtpVerifyRequest) => Promise<void>;
   apiLogin: (data: LoginRequest) => Promise<void>;
 }
@@ -36,52 +35,65 @@ export const useAuthStore = create<AuthStore>()(
       refreshToken: null,
       isAuthenticated: false,
 
-      login: (user, token, refreshToken) =>
-        set({ user, token, refreshToken: refreshToken ?? null, isAuthenticated: true }),
+      setAuth: (response) =>
+        set({
+          user: response.user,
+          token: response.accessToken,
+          refreshToken: response.refreshToken,
+          isAuthenticated: true,
+        }),
+
+      setTokens: (accessToken, refreshToken) =>
+        set({ token: accessToken, refreshToken }),
 
       logout: () =>
         set({ user: null, token: null, refreshToken: null, isAuthenticated: false }),
 
-      updateUser: (data) =>
-        set((s) => ({ user: s.user ? { ...s.user, ...data } : null })),
+      updateUser: (user) => set({ user }),
+
+      // Legacy: matches old `login(user, token, refreshToken)` signature
+      login: (user, token, refreshToken) =>
+        set({ user, token, refreshToken: refreshToken ?? null, isAuthenticated: true }),
 
       apiRegister: async (data) => {
-        const { register } = await import("@/lib/api/auth");
-        return register(data);
+        const { authApi } = await import("@/lib/api/auth");
+        return authApi.register(data);
       },
 
       apiVerifyOtp: async (data) => {
-        const { verifyOtp } = await import("@/lib/api/auth");
-        const res = await verifyOtp(data);
-        const user: User = {
-          id:          res.user.id,
-          firstName:   res.user.firstName,
-          lastName:    res.user.lastName,
-          email:       res.user.email,
-          phone:       res.user.phone,
-          role:        res.user.role,
-          isVerified:  res.user.verified,
-          avatar:      res.user.avatarUrl,
-        };
-        set({ user, token: res.accessToken, refreshToken: res.refreshToken, isAuthenticated: true });
+        const { authApi } = await import("@/lib/api/auth");
+        const res = await authApi.verifyOtp(data);
+        set({
+          user: res.user,
+          token: res.accessToken,
+          refreshToken: res.refreshToken,
+          isAuthenticated: true,
+        });
       },
 
       apiLogin: async (data) => {
-        const { login } = await import("@/lib/api/auth");
-        const res = await login(data);
-        const user: User = {
-          id:          res.user.id,
-          firstName:   res.user.firstName,
-          lastName:    res.user.lastName,
-          email:       res.user.email,
-          phone:       res.user.phone,
-          role:        res.user.role,
-          isVerified:  res.user.verified,
-          avatar:      res.user.avatarUrl,
-        };
-        set({ user, token: res.accessToken, refreshToken: res.refreshToken, isAuthenticated: true });
+        const { authApi } = await import("@/lib/api/auth");
+        const res = await authApi.login(data);
+        set({
+          user: res.user,
+          token: res.accessToken,
+          refreshToken: res.refreshToken,
+          isAuthenticated: true,
+        });
       },
     }),
     { name: "souk-auth" }
   )
 );
+
+// ── Selectors ──────────────────────────────────────────────
+export const useIsAuthenticated = () => useAuthStore((s) => s.isAuthenticated);
+export const useCurrentUser = () => useAuthStore((s) => s.user);
+export const useIsVendor = () => useAuthStore((s) => s.user?.role === "VENDOR");
+export const useIsAdmin = () => useAuthStore((s) => s.user?.role === "ADMIN");
+
+export function useAuthHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  return hydrated;
+}

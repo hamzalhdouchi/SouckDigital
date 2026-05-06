@@ -141,7 +141,7 @@ function HeroSection({ locale }: { locale: string }) {
 /* ────────────── Categories ────────────── */
 function CategorySection({ locale, apiCategories }: {
   locale: string;
-  apiCategories: { id: string; slug: string; name: string; nameAr: string; emoji: string; imageUrl: string | null }[] | null;
+  apiCategories: { id: string; slug: string; name: string; nameAr: string; emoji: string | null; imageUrl: string | null }[] | null;
 }) {
   const isAr = locale === "ar";
   const cats = apiCategories ?? MOCK_CATEGORIES.map((c) => ({ ...c, imageUrl: c.image }));
@@ -158,7 +158,7 @@ function CategorySection({ locale, apiCategories }: {
             key={cat.id}
             slug={cat.slug}
             name={isAr ? cat.nameAr : cat.name}
-            emoji={cat.emoji}
+            emoji={cat.emoji ?? undefined}
             image={cat.imageUrl ?? ""}
             locale={locale}
             size="md"
@@ -258,7 +258,7 @@ function FeaturedProductsSection({ locale, apiProducts }: {
             rating={p.rating}
             reviewCount={p.reviewCount}
             vendor={p.vendor}
-            badge={p.badge as "artisan" | "sale" | "new_" | "top" | "flash" | undefined}
+            badge={(p.badge?.toLowerCase() as "artisan" | "sale" | "new" | "top" | "flash" | undefined)}
             inStock={p.inStock}
             freeDelivery={p.freeDelivery}
             locale={locale}
@@ -331,7 +331,6 @@ function VendorSection({ locale, apiVendors }: {
         {items.map((v) => (
           <VendorCard
             key={v.id}
-            id={v.id}
             slug={v.slug}
             name={v.name}
             city={v.city}
@@ -340,8 +339,8 @@ function VendorSection({ locale, apiVendors }: {
             productCount={v.productCount}
             artisan={v.artisan}
             verified={v.verified}
-            avatar={v.avatarUrl ?? undefined}
-            banner={v.bannerUrl ?? undefined}
+            avatar={v.avatarUrl ?? ""}
+            banner={v.bannerUrl ?? ""}
             locale={locale}
           />
         ))}

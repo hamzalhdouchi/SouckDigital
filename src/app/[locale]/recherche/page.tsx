@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
 import ProductCard from "@/components/modules/product-card";
 import Button from "@/components/ui/button";
+import { FilterPanel } from "@/components/modules/filter-panel";
 import { MOCK_PRODUCTS } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -15,8 +16,6 @@ const SORT_OPTIONS = [
   { value: "newest",     labelFr: "Les plus récents",        labelAr: "الأحدث" },
   { value: "rating",     labelFr: "Meilleures notes",        labelAr: "الأعلى تقييماً" },
 ];
-
-const CITIES = ["Casablanca", "Marrakech", "Fès", "Rabat", "Agadir", "Tanger", "Essaouira", "Safi", "Azilal"];
 
 function SearchContent() {
   const params = useParams();
@@ -141,84 +140,19 @@ function SearchContent() {
         {filtersOpen && (
           <aside className="w-64 shrink-0">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-24">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-900 text-sm">{isAr ? "الفلاتر" : "Filtres"}</h3>
-                <button
-                  onClick={() => {
-                    setFreeDelivery(false);
-                    setArtisanOnly(false);
-                    setSelectedCities([]);
-                    setPriceMin("");
-                    setPriceMax("");
-                    setMinRating(0);
-                  }}
-                  className="text-xs text-souk-green-700 font-semibold hover:text-souk-green-800"
-                >
-                  {isAr ? "مسح الكل" : "Tout effacer"}
-                </button>
-              </div>
-
-              {/* Quick filters */}
-              <div className="space-y-2.5 mb-5 pb-5 border-b border-gray-50">
-                <label className="flex items-center gap-2.5 cursor-pointer">
-                  <input type="checkbox" checked={freeDelivery} onChange={(e) => setFreeDelivery(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-souk-green-600 focus:ring-souk-green-500" />
-                  <span className="text-sm text-gray-700">{isAr ? "توصيل مجاني" : "Livraison gratuite"}</span>
-                </label>
-                <label className="flex items-center gap-2.5 cursor-pointer">
-                  <input type="checkbox" checked={artisanOnly} onChange={(e) => setArtisanOnly(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-souk-green-600 focus:ring-souk-green-500" />
-                  <span className="text-sm text-gray-700">{isAr ? "صناعة تقليدية" : "Artisanat marocain"}</span>
-                </label>
-              </div>
-
-              {/* Price range */}
-              <div className="mb-5 pb-5 border-b border-gray-50">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">{isAr ? "نطاق السعر (DH)" : "Prix (DH)"}</p>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number" value={priceMin} onChange={(e) => setPriceMin(e.target.value)}
-                    placeholder={isAr ? "أدنى" : "Min"}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-souk-green-500"
-                  />
-                  <span className="text-gray-400">—</span>
-                  <input
-                    type="number" value={priceMax} onChange={(e) => setPriceMax(e.target.value)}
-                    placeholder={isAr ? "أقصى" : "Max"}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-souk-green-500"
-                  />
-                </div>
-              </div>
-
-              {/* Rating */}
-              <div className="mb-5 pb-5 border-b border-gray-50">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">{isAr ? "التقييم الأدنى" : "Note minimale"}</p>
-                <div className="space-y-1.5">
-                  {[4, 3, 2, 0].map((r) => (
-                    <label key={r} className="flex items-center gap-2 cursor-pointer">
-                      <input type="radio" name="rating" checked={minRating === r} onChange={() => setMinRating(r)}
-                        className="text-souk-green-600 focus:ring-souk-green-500" />
-                      <span className="text-sm text-gray-700">
-                        {r > 0 ? `${r}★ ${isAr ? "وأكثر" : "et plus"}` : isAr ? "الكل" : "Tous"}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Cities */}
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">{isAr ? "المدينة" : "Ville"}</p>
-                <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                  {CITIES.map((city) => (
-                    <label key={city} className="flex items-center gap-2.5 cursor-pointer">
-                      <input type="checkbox" checked={selectedCities.includes(city)} onChange={() => toggleCity(city)}
-                        className="w-4 h-4 rounded border-gray-300 text-souk-green-600 focus:ring-souk-green-500" />
-                      <span className="text-sm text-gray-700">{city}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <FilterPanel
+                priceMin={priceMin} setPriceMin={setPriceMin}
+                priceMax={priceMax} setPriceMax={setPriceMax}
+                selectedCities={selectedCities} toggleCity={toggleCity}
+                freeDelivery={freeDelivery} setFreeDelivery={setFreeDelivery}
+                artisanOnly={artisanOnly} setArtisanOnly={setArtisanOnly}
+                minRating={minRating} setMinRating={setMinRating}
+                onReset={() => {
+                  setFreeDelivery(false); setArtisanOnly(false);
+                  setSelectedCities([]); setPriceMin(""); setPriceMax(""); setMinRating(0);
+                }}
+                isAr={isAr}
+              />
             </div>
           </aside>
         )}

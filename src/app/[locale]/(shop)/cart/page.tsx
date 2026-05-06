@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Plus, Minus, Tag, ArrowRight, ShoppingBag, CheckCircle, Truck, Banknote, CreditCard, Smartphone, Building2, PartyPopper } from "lucide-react";
+import { Trash2, Plus, Minus, Tag, ArrowRight, ShoppingBag, Truck, Banknote, CreditCard, Smartphone, Building2, PartyPopper } from "lucide-react";
 import Button from "@/components/ui/button";
+import { PromoInput } from "@/components/modules/promo-input";
 import { useCartStore } from "@/lib/store/cart";
 import { cn, formatPriceSimple } from "@/lib/utils";
 
@@ -14,20 +14,11 @@ export default function CartPage() {
   const locale = params.locale as string;
   const isAr = locale === "ar";
 
-  const { items, removeItem, updateQuantity, applyPromo, promoCode, discount, subtotal, total } = useCartStore();
-  const [promoInput, setPromoInput] = useState("");
-  const [promoError, setPromoError] = useState(false);
-  const [promoSuccess, setPromoSuccess] = useState(false);
+  const { items, removeItem, updateQuantity, subtotal, total, discount } = useCartStore();
 
   const sub = subtotal();
   const tot = total();
   const deliveryFee = sub >= 300 ? 0 : 35;
-
-  const handleApplyPromo = () => {
-    const ok = applyPromo(promoInput);
-    setPromoError(!ok);
-    setPromoSuccess(ok);
-  };
 
   const groupedByVendor = items.reduce<Record<string, typeof items>>((acc, item) => {
     const key = item.vendorName;
@@ -81,7 +72,7 @@ export default function CartPage() {
                 {vendorItems.map((item) => (
                   <div key={item.id} className="p-4 flex gap-4">
                     <Link href={`/${locale}/produits/${item.slug}`} className="relative h-20 w-20 rounded-lg overflow-hidden bg-souk-sand shrink-0">
-                      <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      <Image src={item.image ?? ""} alt={item.name} fill className="object-cover" />
                     </Link>
                     <div className="flex-1 min-w-0">
                       <Link href={`/${locale}/produits/${item.slug}`} className="font-semibold text-sm text-gray-900 hover:text-souk-green-800 line-clamp-2">
@@ -140,23 +131,7 @@ export default function CartPage() {
               <Tag size={15} className="text-souk-gold-500" />
               {isAr ? "رمز الترويج" : "Code promo"}
             </h3>
-            <div className="flex gap-2">
-              <input
-                value={promoInput}
-                onChange={(e) => { setPromoInput(e.target.value); setPromoError(false); setPromoSuccess(false); }}
-                placeholder={isAr ? "أدخل الرمز" : "Entrez votre code"}
-                className={cn(
-                  "flex-1 h-10 border rounded-lg px-3 text-sm focus:outline-none focus:ring-2",
-                  promoError ? "border-red-400 focus:ring-red-300" : promoSuccess ? "border-emerald-400 focus:ring-emerald-300" : "border-gray-300 focus:ring-souk-gold-400"
-                )}
-              />
-              <Button variant="secondary" size="sm" onClick={handleApplyPromo}>
-                {isAr ? "تطبيق" : "Appliquer"}
-              </Button>
-            </div>
-            {promoError && <p className="text-xs text-red-500 mt-1">Code invalide ou expiré</p>}
-            {promoSuccess && <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1"><CheckCircle size={12} />Code appliqué ! -{discount}% sur votre commande</p>}
-            {!promoInput && <p className="text-xs text-gray-400 mt-1">Essayez : SOUK10, ARTISAN20, BIENVENUE15</p>}
+            <PromoInput isAr={isAr} />
           </div>
 
           {/* Summary */}

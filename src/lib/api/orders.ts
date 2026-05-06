@@ -1,27 +1,31 @@
 import { get, patch, post } from "./client";
-import type { OrderDetailDto, OrderSummaryDto, Page, PlaceOrderRequest } from "./types";
+import type {
+  OrderDetailDto,
+  OrderStatus,
+  OrderSummaryDto,
+  Page,
+  PlaceOrderRequest,
+  PromoValidationResponse,
+} from "./types";
 
-export function placeOrder(data: PlaceOrderRequest) {
-  return post<OrderDetailDto>("/orders", data);
-}
+export const ordersApi = {
+  place: (data: PlaceOrderRequest) => post<OrderDetailDto>("/orders", data),
 
-export function getMyOrders(page = 0, size = 10) {
-  return get<Page<OrderSummaryDto>>(`/orders/my?page=${page}&size=${size}`);
-}
+  getMyOrders: (page = 0) =>
+    get<Page<OrderSummaryDto>>(`/orders/my?page=${page}`),
 
-export function getOrderById(id: string) {
-  return get<OrderDetailDto>(`/orders/${id}`);
-}
+  getById: (id: string) => get<OrderDetailDto>(`/orders/${id}`),
 
-export function updateOrderStatus(id: string, status: string) {
-  return patch<OrderDetailDto>(`/orders/${id}/status`, { status });
-}
+  updateStatus: (id: string, status: OrderStatus) =>
+    patch<OrderDetailDto>(`/orders/${id}/status`, { status }),
+};
 
 export function validatePromo(code: string) {
-  return post<{
-    valid: boolean;
-    code: string | null;
-    discountPercent: number | null;
-    message: string;
-  }>("/promo/validate", { code });
+  return post<PromoValidationResponse>("/promo/validate", { code });
 }
+
+// Legacy named exports
+export const placeOrder = ordersApi.place;
+export const getMyOrders = ordersApi.getMyOrders;
+export const getOrderById = ordersApi.getById;
+export const updateOrderStatus = ordersApi.updateStatus;

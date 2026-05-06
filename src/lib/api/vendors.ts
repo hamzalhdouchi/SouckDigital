@@ -1,42 +1,47 @@
 import { del, get, post, put } from "./client";
-import type { Page, ProductSummaryDto, VendorSummaryDto } from "./types";
+import type {
+  AuthResponse,
+  CreateVendorRequest,
+  Page,
+  ProductSummaryDto,
+  VendorDetailDto,
+  VendorSummaryDto,
+} from "./types";
 
-export interface VendorDetailDto extends VendorSummaryDto {
-  description: string | null;
-  descriptionAr: string | null;
-  memberSince: string | null;
-  followerCount: number;
-}
+export const vendorsApi = {
+  getAll: (params?: { page?: number; size?: number; city?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.city) qs.set("city", params.city);
+    if (params?.page !== undefined) qs.set("page", String(params.page));
+    if (params?.size !== undefined) qs.set("size", String(params.size));
+    const s = qs.toString();
+    return get<Page<VendorSummaryDto>>(`/vendors${s ? `?${s}` : ""}`);
+  },
 
-export function getVendors(params?: { city?: string; page?: number; size?: number }) {
-  const q = new URLSearchParams();
-  if (params?.city)  q.set("city",  params.city);
-  if (params?.page !== undefined) q.set("page", String(params.page));
-  if (params?.size !== undefined) q.set("size", String(params.size));
-  const qs = q.toString();
-  return get<Page<VendorSummaryDto>>(`/vendors${qs ? `?${qs}` : ""}`);
-}
+  getBySlug: (slug: string) => get<VendorDetailDto>(`/vendors/${slug}`),
 
-export function getVendorBySlug(slug: string) {
-  return get<VendorDetailDto>(`/vendors/${slug}/storefront`);
-}
+  getProducts: (slug: string, page = 0) =>
+    get<Page<ProductSummaryDto>>(`/vendors/${slug}/products?page=${page}`),
 
-export function getVendorProducts(slug: string, page = 0, size = 20) {
-  return get<Page<ProductSummaryDto>>(`/vendors/${slug}/products?page=${page}&size=${size}`);
-}
+  register: (data: CreateVendorRequest) =>
+    post<AuthResponse>("/vendors/register", data),
 
-export function followVendor(id: string) {
-  return post<void>(`/vendors/${id}/follow`);
-}
+  getMyProfile: () => get<VendorDetailDto>("/vendors/me"),
 
-export function unfollowVendor(id: string) {
-  return del<void>(`/vendors/${id}/follow`);
-}
+  updateMyProfile: (data: Partial<CreateVendorRequest>) =>
+    put<VendorDetailDto>("/vendors/me", data),
 
-export function getMyVendorProfile() {
-  return get<VendorDetailDto>("/vendors/me");
-}
+  follow: (vendorId: string) => post<void>(`/vendors/${vendorId}/follow`),
 
-export function updateMyVendorProfile(data: Partial<VendorDetailDto>) {
-  return put<VendorDetailDto>("/vendors/me", data);
-}
+  unfollow: (vendorId: string) => del<void>(`/vendors/${vendorId}/follow`),
+};
+
+// Legacy named exports
+export const getVendors = vendorsApi.getAll;
+export const getVendorBySlug = vendorsApi.getBySlug;
+export const getVendorProducts = vendorsApi.getProducts;
+export const followVendor = vendorsApi.follow;
+export const unfollowVendor = vendorsApi.unfollow;
+export const getMyVendorProfile = vendorsApi.getMyProfile;
+export const updateMyVendorProfile = vendorsApi.updateMyProfile;
+export type { VendorDetailDto };

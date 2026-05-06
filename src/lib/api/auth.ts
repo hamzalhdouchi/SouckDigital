@@ -1,27 +1,32 @@
-import { get, post } from "./client";
+import { post } from "./client";
 import type {
   AuthResponse,
   LoginRequest,
   OtpVerifyRequest,
   RegisterRequest,
+  RegisterResponse,
 } from "./types";
 
-export function register(data: RegisterRequest) {
-  return post<{ id: string; message: string }>("/auth/register", data);
-}
+export const authApi = {
+  register: (data: RegisterRequest) =>
+    post<RegisterResponse>("/auth/register", data),
 
-export function verifyOtp(data: OtpVerifyRequest) {
-  return post<AuthResponse>("/auth/verify-otp", data);
-}
+  verifyOtp: (data: OtpVerifyRequest) =>
+    post<AuthResponse>("/auth/verify-otp", data),
 
-export function login(data: LoginRequest) {
-  return post<AuthResponse>("/auth/login", data);
-}
+  login: (data: LoginRequest) =>
+    post<AuthResponse>("/auth/login", data),
 
-export function refreshToken(token: string) {
-  return post<{ accessToken: string }>("/auth/refresh", { refreshToken: token });
-}
+  refreshToken: (refreshToken: string) =>
+    post<{ accessToken: string }>("/auth/refresh", { refreshToken }),
 
-export function resendOtp(phone: string) {
-  return post<{ message: string }>("/auth/resend-otp", { phone });
-}
+  resendOtp: (phone: string) =>
+    post<void>("/auth/resend-otp", { phone }),
+};
+
+// Legacy named exports
+export const register = authApi.register;
+export const verifyOtp = authApi.verifyOtp;
+export const login = authApi.login;
+export const refreshToken = authApi.refreshToken;
+export const resendOtp = authApi.resendOtp;

@@ -7,6 +7,8 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MobileNav from "@/components/layout/mobile-nav";
 import CartDrawer from "@/components/layout/cart-drawer";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { Toaster } from "sonner";
 
 interface Props {
   children: React.ReactNode;
@@ -42,11 +44,14 @@ export default async function LocaleLayout({ children, params }: Props) {
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-souk-sand font-cairo antialiased">
         <NextIntlClientProvider messages={messages}>
-          <Header locale={locale} />
-          <main className="flex-1">{children}</main>
-          <Footer locale={locale} />
-          <MobileNav locale={locale} />
-          <CartDrawer locale={locale} isAr={isRTL(locale)} />
+          <QueryProvider>
+            <Header locale={locale} />
+            <main className="flex-1">{children}</main>
+            <Footer locale={locale} />
+            <MobileNav locale={locale} />
+            <CartDrawer locale={locale} isAr={isRTL(locale)} />
+            <Toaster richColors position="top-right" />
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>
