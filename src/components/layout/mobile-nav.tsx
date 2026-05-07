@@ -16,9 +16,9 @@ export default function MobileNav({ locale }: MobileNavProps) {
 
   const items = [
     { key: "home",       href: `/${locale}`,             Icon: Home },
-    { key: "categories", href: `/${locale}/categories`,  Icon: Grid3x3 },
-    { key: "deals",      href: `/${locale}/promotions`,  Icon: Tag },
-    { key: "cart",       href: `/${locale}/panier`,      Icon: ShoppingCart, badge: itemCount },
+    { key: "categories", href: `/${locale}`,              Icon: Grid3x3 },
+    { key: "deals",      href: `/${locale}/recherche`,   Icon: Tag },
+    { key: "cart",       href: `/${locale}/cart`,        Icon: ShoppingCart, badge: itemCount },
     { key: "profile",    href: `/${locale}/profil`,      Icon: User },
   ];
 

@@ -17,7 +17,7 @@ const LOCALES = [
 ];
 
 const NAV_LINKS = [
-  { key: "categories", href: "/categories" },
+  { key: "categories", href: "" },
   { key: "deals",      href: "/promotions" },
   { key: "vendors",    href: "/vendeurs" },
 ];
@@ -107,7 +107,7 @@ export default function Header({ locale }: HeaderProps) {
             </Link>
           ) : (
             <Link
-              href={`/${locale}/connexion`}
+              href={`/${locale}/login`}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-souk-green-800 text-souk-green-800 text-sm font-medium hover:bg-souk-green-50 transition-colors"
             >
               <User size={15} />

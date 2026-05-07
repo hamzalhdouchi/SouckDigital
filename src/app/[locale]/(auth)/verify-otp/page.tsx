@@ -171,7 +171,7 @@ function VerifyOtpContent() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           {isAr ? "رقم هاتف خاطئ؟ " : "Mauvais numéro ? "}
-          <Link href={`/${locale}/inscription`} className="text-souk-green-700 font-semibold hover:underline">
+          <Link href={`/${locale}/register`} className="text-souk-green-700 font-semibold hover:underline">
             {isAr ? "العودة للتسجيل" : "Retour à l'inscription"}
           </Link>
         </p>

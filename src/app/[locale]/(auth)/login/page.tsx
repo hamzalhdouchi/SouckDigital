@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod/v4";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Phone, Lock, ArrowRight, AlertCircle } from "lucide-react";
@@ -9,6 +12,12 @@ import Input from "@/components/ui/input";
 import { useAuthStore } from "@/lib/store/auth";
 import { cn } from "@/lib/utils";
 
+const schema = z.object({
+  identifier: z.string().min(1, "Champ requis"),
+  password: z.string().min(1, "Champ requis"),
+});
+type FormData = z.infer<typeof schema>;
+
 export default function LoginPage() {
   const params = useParams();
   const locale = params.locale as string;
@@ -16,26 +25,26 @@ export default function LoginPage() {
   const isAr = locale === "ar";
 
   const apiLogin = useAuthStore((s) => s.apiLogin);
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [serverError, setServerError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const onSubmit = handleSubmit(async (data) => {
+    setServerError("");
     try {
-      await apiLogin({ identifier, password });
+      await apiLogin(data);
       router.push(`/${locale}`);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : (isAr ? "بيانات غير صحيحة" : "Identifiants incorrects");
-      setError(msg);
-    } finally {
-      setLoading(false);
+      setServerError(
+        err instanceof Error ? err.message : (isAr ? "بيانات غير صحيحة" : "Identifiants incorrects")
+      );
     }
-  };
+  });
 
   return (
     <div className="min-h-screen flex">
@@ -64,7 +73,6 @@ export default function LoginPage() {
             ))}
           </div>
         </div>
-        {/* Zellige decorative grid */}
         <div className="absolute bottom-0 end-0 w-48 h-48 opacity-10 grid grid-cols-6 gap-1 p-3">
           {Array.from({ length: 36 }).map((_, i) => (
             <div key={i} className={cn("h-5 w-5 rounded-sm", i % 2 === 0 ? "bg-souk-gold-400" : "bg-white")} />
@@ -93,7 +101,7 @@ export default function LoginPage() {
             { icon: "🌐", label: "Google" },
             { icon: "📘", label: "Facebook" },
           ].map((s) => (
-            <button key={s.label} className="flex items-center justify-center gap-2 h-11 border border-gray-300 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+            <button key={s.label} type="button" className="flex items-center justify-center gap-2 h-11 border border-gray-300 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
               <span>{s.icon}</span>
               <span>{s.label}</span>
             </button>
@@ -105,22 +113,20 @@ export default function LoginPage() {
           <div className="relative flex justify-center"><span className="bg-white px-3 text-sm text-gray-500">{isAr ? "أو" : "ou"}</span></div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4">
           <Input
             label={isAr ? "البريد الإلكتروني أو الهاتف" : "Email ou téléphone"}
             type="text"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
             placeholder={isAr ? "example@email.com أو 0612345678" : "email@exemple.com ou 0612345678"}
             leftIcon={<Phone size={16} />}
-            required fullWidth
+            fullWidth
+            error={errors.identifier?.message}
+            {...register("identifier")}
           />
           <div>
             <Input
               label={isAr ? "كلمة المرور" : "Mot de passe"}
               type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               leftIcon={<Lock size={16} />}
               rightIcon={
@@ -128,7 +134,9 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               }
-              required fullWidth
+              fullWidth
+              error={errors.password?.message}
+              {...register("password")}
             />
             <div className="flex justify-end mt-1">
               <Link href={`/${locale}/mot-de-passe-oublie`} className="text-xs text-souk-green-700 hover:text-souk-green-800 hover:underline">
@@ -137,16 +145,20 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-500 flex items-center justify-center gap-1.5"><AlertCircle size={14} />{error}</p>}
+          {serverError && (
+            <p className="text-sm text-red-500 flex items-center justify-center gap-1.5">
+              <AlertCircle size={14} />{serverError}
+            </p>
+          )}
 
-          <Button type="submit" fullWidth size="lg" loading={loading} rightIcon={<ArrowRight size={18} />}>
+          <Button type="submit" fullWidth size="lg" loading={isSubmitting} rightIcon={<ArrowRight size={18} />}>
             {isAr ? "تسجيل الدخول" : "Se connecter"}
           </Button>
         </form>
 
         <p className="text-sm text-center text-gray-600 mt-6">
           {isAr ? "ليس لديك حساب؟ " : "Pas encore de compte ? "}
-          <Link href={`/${locale}/inscription`} className="text-souk-green-700 font-semibold hover:underline">
+          <Link href={`/${locale}/register`} className="text-souk-green-700 font-semibold hover:underline">
             {isAr ? "إنشاء حساب مجاني" : "S'inscrire gratuitement"}
           </Link>
         </p>

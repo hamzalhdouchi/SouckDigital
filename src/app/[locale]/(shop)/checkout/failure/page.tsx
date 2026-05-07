@@ -102,7 +102,7 @@ function CheckoutFailureContent() {
           </Link>
         ) : (
           <Link
-            href={`/${locale}/commander`}
+            href={`/${locale}/checkout`}
             className="w-full flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl hover:border-souk-gold-400 hover:bg-souk-gold-50 transition-colors"
           >
             <div className="p-2 bg-souk-gold-100 rounded-xl shrink-0">

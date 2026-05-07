@@ -1,23 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle, ChevronRight, Truck, CreditCard, Smartphone, Building2, Banknote, Zap, Package, AlertCircle } from "lucide-react";
 import Button from "@/components/ui/button";
-import Input from "@/components/ui/input";
+import { DeliveryAddressForm, type DeliveryAddressFormRef } from "@/components/modules/delivery-address-form";
 import { useCartStore } from "@/lib/store/cart";
 import { cn, formatPriceSimple } from "@/lib/utils";
+import { ordersApi } from "@/lib/api/orders";
+import { paymentApi } from "@/lib/api/payment";
 import type { PlaceOrderRequest } from "@/lib/api/types";
 
 type Step = 1 | 2 | 3;
-
-const MOROCCAN_CITIES = [
-  "Casablanca", "Rabat", "Marrakech", "Fès", "Tanger", "Agadir",
-  "Meknès", "Oujda", "Kenitra", "Tétouan", "Salé", "Nador",
-  "Béni Mellal", "Khouribga", "El Jadida", "Safi", "Mohammedia",
-];
 
 const PAYMENT_METHODS = [
   { id: "cod",      icon: Banknote,    label: "Paiement à la livraison",   sub: "Payez cash à la réception",        popular: true },
@@ -40,13 +36,13 @@ export default function CheckoutPage() {
   const isAr = locale === "ar";
 
   const { items, subtotal, total, discount, promoCode, clearCart } = useCartStore();
+  const addressFormRef = useRef<DeliveryAddressFormRef>(null);
   const [step, setStep] = useState<Step>(1);
   const [confirmed, setConfirmed] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  const [address, setAddress] = useState({ firstName: "", lastName: "", phone: "", city: "", street: "", zip: "" });
   const [deliveryMethod, setDeliveryMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
@@ -83,7 +79,7 @@ export default function CheckoutPage() {
           <Link href={`/${locale}`}>
             <Button variant="outline">Retour à l'accueil</Button>
           </Link>
-          <Link href={`/${locale}/profil/commandes`}>
+          <Link href={`/${locale}/account/orders`}>
             <Button>Suivre ma commande</Button>
           </Link>
         </div>
@@ -128,30 +124,15 @@ export default function CheckoutPage() {
               <h2 className="font-bold text-lg text-gray-900 mb-5">
                 {isAr ? "عنوان التوصيل" : "Adresse de livraison"}
               </h2>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <Input label={isAr ? "الاسم الأول" : "Prénom"} value={address.firstName} onChange={(e) => setAddress({ ...address, firstName: e.target.value })} required fullWidth />
-                <Input label={isAr ? "اسم العائلة" : "Nom"} value={address.lastName} onChange={(e) => setAddress({ ...address, lastName: e.target.value })} required fullWidth />
-                <Input label={isAr ? "الهاتف" : "Téléphone"} type="tel" placeholder="+212 6XX XXX XXX" value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} required fullWidth />
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {isAr ? "المدينة" : "Ville"} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={address.city}
-                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    className="w-full h-11 border border-gray-300 rounded-lg px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-souk-gold-500"
-                  >
-                    <option value="">Sélectionner une ville</option>
-                    {MOROCCAN_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div className="sm:col-span-2">
-                  <Input label={isAr ? "العنوان الكامل" : "Adresse complète"} value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} placeholder="N° rue, quartier, immeuble..." required fullWidth />
-                </div>
-                <Input label={isAr ? "الرمز البريدي" : "Code postal"} value={address.zip} onChange={(e) => setAddress({ ...address, zip: e.target.value })} placeholder="XXXXX" fullWidth />
-              </div>
+              <DeliveryAddressForm ref={addressFormRef} isAr={isAr} />
               <div className="mt-6 flex justify-end">
-                <Button onClick={() => setStep(2)} rightIcon={<ChevronRight size={16} />}>
+                <Button
+                  onClick={async () => {
+                    const valid = await addressFormRef.current?.validate();
+                    if (valid) setStep(2);
+                  }}
+                  rightIcon={<ChevronRight size={16} />}
+                >
                   {isAr ? "الخطوة التالية" : "Étape suivante"}
                 </Button>
               </div>
@@ -221,16 +202,6 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              {paymentMethod === "card" && (
-                <div className="p-4 bg-souk-sand rounded-xl border border-gray-200 space-y-3 mb-6">
-                  <Input label="Numéro de carte" placeholder="XXXX XXXX XXXX XXXX" fullWidth />
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input label="Date d'expiration" placeholder="MM/AA" fullWidth />
-                    <Input label="CVV" placeholder="XXX" type="password" fullWidth />
-                  </div>
-                </div>
-              )}
-
               {submitError && (
                 <p className="text-sm text-red-500 flex items-center gap-1.5 mb-3">
                   <AlertCircle size={14} />{submitError}
@@ -244,23 +215,33 @@ export default function CheckoutPage() {
                   loading={submitting}
                   onClick={async () => {
                     setSubmitError("");
+                    const addr = addressFormRef.current?.getValues();
+                    if (!addr) {
+                      setStep(1);
+                      setSubmitError(isAr ? "يرجى ملء عنوان التوصيل" : "Veuillez compléter l'adresse de livraison");
+                      return;
+                    }
                     setSubmitting(true);
                     try {
-                      const { placeOrder } = await import("@/lib/api/orders");
-                      const order = await placeOrder({
+                      const order = await ordersApi.place({
                         items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
                         address: {
-                          firstName: address.firstName,
-                          lastName: address.lastName,
-                          phone: address.phone,
-                          street: address.street,
-                          city: address.city,
-                          zipCode: address.zip || undefined,
+                          firstName: addr.firstName,
+                          lastName: addr.lastName,
+                          phone: addr.phone,
+                          street: addr.street,
+                          city: addr.city,
+                          zipCode: addr.zipCode || undefined,
                         },
                         paymentMethod: PAYMENT_METHOD_MAP[paymentMethod] ?? "COD",
                         promoCode: promoCode ?? undefined,
                       });
                       clearCart();
+                      if (PAYMENT_METHOD_MAP[paymentMethod] === "CARD_CMI") {
+                        const cmi = await paymentApi.initCmi(order.id);
+                        router.push(cmi.paymentUrl);
+                        return;
+                      }
                       setConfirmedOrderId(order.id);
                       setConfirmed(true);
                     } catch (err: unknown) {

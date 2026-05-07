@@ -37,7 +37,7 @@ export default function CartPage() {
         <p className="text-gray-500 mb-6">
           {isAr ? "اكتشف منتجاتنا وابدأ تسوقك" : "Découvrez nos produits et commencez vos achats"}
         </p>
-        <Link href={`/${locale}/categories`}>
+        <Link href={`/${locale}`}>
           <Button variant="primary" size="lg">
             {isAr ? "متابعة التسوق" : "Continuer mes achats"}
           </Button>
@@ -71,11 +71,11 @@ export default function CartPage() {
               <div className="divide-y divide-gray-50">
                 {vendorItems.map((item) => (
                   <div key={item.id} className="p-4 flex gap-4">
-                    <Link href={`/${locale}/produits/${item.slug}`} className="relative h-20 w-20 rounded-lg overflow-hidden bg-souk-sand shrink-0">
+                    <Link href={`/${locale}/products/${item.slug}`} className="relative h-20 w-20 rounded-lg overflow-hidden bg-souk-sand shrink-0">
                       <Image src={item.image ?? ""} alt={item.name} fill className="object-cover" />
                     </Link>
                     <div className="flex-1 min-w-0">
-                      <Link href={`/${locale}/produits/${item.slug}`} className="font-semibold text-sm text-gray-900 hover:text-souk-green-800 line-clamp-2">
+                      <Link href={`/${locale}/products/${item.slug}`} className="font-semibold text-sm text-gray-900 hover:text-souk-green-800 line-clamp-2">
                         {item.name}
                       </Link>
                       {item.variant && (
@@ -162,7 +162,7 @@ export default function CartPage() {
               </div>
             </div>
 
-            <Link href={`/${locale}/commander`}>
+            <Link href={`/${locale}/checkout`}>
               <Button fullWidth size="lg" className="mt-4" rightIcon={<ArrowRight size={18} />}>
                 {isAr ? "إتمام الطلب" : "Passer la commande"}
               </Button>

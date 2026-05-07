@@ -7,11 +7,12 @@ import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend,
 } from "recharts";
 import {
   BarChart3, Package, ShoppingBag, Star, TrendingUp, TrendingDown,
   Plus, Eye, Edit2, ToggleLeft, ToggleRight, AlertCircle,
-  ArrowUpRight, Search, Download,
+  ArrowUpRight, Search, Download, Trash2,
 } from "lucide-react";
 import Button from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { vendorDashboardApi } from "@/lib/api/vendor-dashboard";
 import { ordersApi } from "@/lib/api/orders";
 import { productsApi } from "@/lib/api/products";
+import { useDeleteProduct } from "@/lib/hooks/use-products";
 import type { OrderStatus, OrderSummaryDto, ProductSummaryDto } from "@/lib/api/types";
 
 const ORDER_STATUS_META: Record<OrderStatus, { labelFr: string; labelAr: string; color: string }> = {
@@ -78,6 +80,12 @@ export default function VendorDashboardPage() {
     enabled: activeTab === "products",
   });
 
+  const { data: ordersByStatus } = useQuery({
+    queryKey: ["vendor-orders-by-status"],
+    queryFn: vendorDashboardApi.getOrdersByStatus,
+    enabled: activeTab === "analytics",
+  });
+
   const updateStatus = useMutation({
     mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
       ordersApi.updateStatus(id, status),
@@ -88,6 +96,8 @@ export default function VendorDashboardPage() {
     mutationFn: (id: string) => productsApi.toggleActive(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["vendor-products"] }),
   });
+
+  const deleteProduct = useDeleteProduct();
 
   const STAT_CARDS = stats ? [
     {
@@ -277,6 +287,7 @@ export default function VendorDashboardPage() {
                 isAr={isAr}
                 locale={locale}
                 onToggle={(id) => toggleProduct.mutate(id)}
+                onDelete={(id) => deleteProduct.mutate(id)}
               />
             )}
           </div>
@@ -372,29 +383,101 @@ export default function VendorDashboardPage() {
             </div>
           </div>
 
-          {/* Stats summary */}
-          {stats && (
+          {/* Orders by status donut */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <h3 className="font-bold text-gray-900 mb-4">
-                {isAr ? "إحصائيات عامة" : "Statistiques générales"}
+                {isAr ? "الطلبات حسب الحالة" : "Commandes par statut"}
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
-                {[
-                  { label: isAr ? "إجمالي الإيرادات" : "Revenus totaux", value: formatPrice(stats.revenueTotal, locale) },
-                  { label: isAr ? "إجمالي الطلبات" : "Commandes totales", value: stats.ordersTotal },
-                  { label: isAr ? "عدد التقييمات" : "Nombre d'avis", value: stats.reviewCount },
-                ].map(({ label, value }) => (
-                  <div key={label} className="bg-gray-50 rounded-xl p-4">
-                    <p className="text-lg font-black text-souk-green-800">{value}</p>
-                    <p className="text-xs text-gray-500 mt-1">{label}</p>
-                  </div>
-                ))}
-              </div>
+              {ordersByStatus ? (
+                <OrdersStatusChart data={ordersByStatus} isAr={isAr} />
+              ) : (
+                <Skeleton className="h-48 w-full rounded-xl" />
+              )}
             </div>
-          )}
+
+            {/* Stats summary */}
+            {stats && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <h3 className="font-bold text-gray-900 mb-4">
+                  {isAr ? "إحصائيات عامة" : "Statistiques générales"}
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: isAr ? "إجمالي الإيرادات" : "Revenus totaux", value: formatPrice(stats.revenueTotal, locale) },
+                    { label: isAr ? "إجمالي الطلبات" : "Commandes totales", value: stats.ordersTotal },
+                    { label: isAr ? "عدد التقييمات" : "Nombre d'avis", value: stats.reviewCount },
+                    { label: isAr ? "التقييم المتوسط" : "Note moyenne", value: `${stats.averageRating.toFixed(1)} ★` },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="bg-gray-50 rounded-xl p-4">
+                      <p className="text-lg font-black text-souk-green-800">{value}</p>
+                      <p className="text-xs text-gray-500 mt-1">{label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
+  );
+}
+
+/* ── Orders by status donut chart ── */
+const STATUS_COLORS: Record<string, string> = {
+  PENDING:    "#9CA3AF",
+  CONFIRMED:  "#3B82F6",
+  PROCESSING: "#F59E0B",
+  SHIPPED:    "#6366F1",
+  DELIVERED:  "#10B981",
+  CANCELLED:  "#EF4444",
+  REFUNDED:   "#8B5CF6",
+};
+
+function OrdersStatusChart({ data, isAr }: { data: Record<string, number>; isAr: boolean }) {
+  const entries = Object.entries(data).filter(([, v]) => v > 0);
+  if (entries.length === 0) {
+    return (
+      <div className="h-48 flex items-center justify-center text-sm text-gray-400">
+        {isAr ? "لا توجد بيانات" : "Aucune donnée"}
+      </div>
+    );
+  }
+  const chartData = entries.map(([status, count]) => ({
+    name: isAr
+      ? (ORDER_STATUS_META[status as OrderStatus]?.labelAr ?? status)
+      : (ORDER_STATUS_META[status as OrderStatus]?.labelFr ?? status),
+    value: count,
+    color: STATUS_COLORS[status] ?? "#9CA3AF",
+  }));
+  return (
+    <ResponsiveContainer width="100%" height={200}>
+      <PieChart>
+        <Pie
+          data={chartData}
+          cx="50%"
+          cy="50%"
+          innerRadius={55}
+          outerRadius={80}
+          paddingAngle={2}
+          dataKey="value"
+        >
+          {chartData.map((entry, i) => (
+            <Cell key={i} fill={entry.color} />
+          ))}
+        </Pie>
+        <Tooltip
+          formatter={(value) => [String(value), ""]}
+          contentStyle={{ borderRadius: "12px", fontSize: "12px" }}
+        />
+        <Legend
+          iconType="circle"
+          iconSize={8}
+          formatter={(value) => <span style={{ fontSize: 11 }}>{value}</span>}
+        />
+      </PieChart>
+    </ResponsiveContainer>
   );
 }
 
@@ -497,12 +580,16 @@ function ProductsTable({
   isAr,
   locale,
   onToggle,
+  onDelete,
 }: {
   products: ProductSummaryDto[];
   isAr: boolean;
   locale: string;
   onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
 }) {
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+
   if (products.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-gray-400 flex flex-col items-center gap-3">
@@ -580,6 +667,29 @@ function ProductsTable({
                       <Edit2 size={15} />
                     </button>
                   </Link>
+                  {confirmId === p.id ? (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => { onDelete(p.id); setConfirmId(null); }}
+                        className="px-2 py-1 rounded-lg bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors"
+                      >
+                        {isAr ? "تأكيد" : "Oui"}
+                      </button>
+                      <button
+                        onClick={() => setConfirmId(null)}
+                        className="px-2 py-1 rounded-lg bg-gray-100 text-gray-600 text-xs font-semibold hover:bg-gray-200 transition-colors"
+                      >
+                        {isAr ? "إلغاء" : "Non"}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmId(p.id)}
+                      className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>

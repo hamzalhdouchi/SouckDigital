@@ -9,10 +9,9 @@ import CategoryCard from "@/components/modules/category-card";
 import VendorCard from "@/components/modules/vendor-card";
 import FlashTimer from "@/components/modules/flash-timer";
 import Button from "@/components/ui/button";
-import { MOCK_CATEGORIES, MOCK_PRODUCTS, MOCK_FLASH_PRODUCTS, MOCK_VENDORS } from "@/lib/mock-data";
 import { getCategories, getProducts } from "@/lib/api/products";
 import { getVendors } from "@/lib/api/vendors";
-import type { ProductSummaryDto, VendorSummaryDto } from "@/lib/api/types";
+import type { CategoryResponse, ProductSummaryDto, VendorSummaryDto } from "@/lib/api/types";
 
 interface Props { params: Promise<{ locale: string }> }
 
@@ -27,25 +26,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
 
-  // Fetch live data — fall back to mock on error (e.g. API not running locally)
-  const [categoriesRes, productsRes, vendorsRes] = await Promise.allSettled([
+  const [categoriesRes, productsRes, vendorsRes, flashRes] = await Promise.allSettled([
     getCategories(),
     getProducts({ page: 0, size: 8, sort: "newest" }),
     getVendors({ size: 4 }),
+    getProducts({ page: 0, size: 4, sort: "newest" }),
   ]);
 
-  const categories = categoriesRes.status === "fulfilled" ? categoriesRes.value : null;
-  const products   = productsRes.status   === "fulfilled" ? productsRes.value.content : null;
-  const vendors    = vendorsRes.status    === "fulfilled" ? vendorsRes.value.content : null;
+  const categories    = categoriesRes.status === "fulfilled" ? categoriesRes.value : [];
+  const products      = productsRes.status   === "fulfilled" ? productsRes.value.content : [];
+  const vendors       = vendorsRes.status    === "fulfilled" ? vendorsRes.value.content : [];
+  const flashProducts = flashRes.status      === "fulfilled" ? flashRes.value.content : [];
 
   return (
     <div className="min-h-screen">
       <HeroSection locale={locale} />
-      <CategorySection locale={locale} apiCategories={categories} />
-      <FlashSaleSection locale={locale} />
-      <FeaturedProductsSection locale={locale} apiProducts={products} />
+      <CategorySection locale={locale} categories={categories} />
+      <FlashSaleSection locale={locale} products={flashProducts} />
+      <FeaturedProductsSection locale={locale} products={products} />
       <ArtisanSection locale={locale} />
-      <VendorSection locale={locale} apiVendors={vendors} />
+      <VendorSection locale={locale} vendors={vendors} />
       <TrustSection locale={locale} />
     </div>
   );
@@ -78,12 +78,12 @@ function HeroSection({ locale }: { locale: string }) {
               : "Découvrez des milliers de produits authentiques certifiés, avec livraison partout au Maroc"}
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href={`/${locale}/categories`}>
+            <Link href={`/${locale}`}>
               <Button variant="gold" size="lg" rightIcon={<ArrowRight size={18} />}>
                 {isAr ? "استكشف الآن" : "Explorer maintenant"}
               </Button>
             </Link>
-            <Link href={`/${locale}/vendeurs/inscription`}>
+            <Link href={`/${locale}/account/become-vendor`}>
               <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10">
                 {isAr ? "أنشئ متجرك" : "Ouvrir ma boutique"}
               </Button>
@@ -139,21 +139,21 @@ function HeroSection({ locale }: { locale: string }) {
 }
 
 /* ────────────── Categories ────────────── */
-function CategorySection({ locale, apiCategories }: {
+function CategorySection({ locale, categories }: {
   locale: string;
-  apiCategories: { id: string; slug: string; name: string; nameAr: string; emoji: string | null; imageUrl: string | null }[] | null;
+  categories: CategoryResponse[];
 }) {
   const isAr = locale === "ar";
-  const cats = apiCategories ?? MOCK_CATEGORIES.map((c) => ({ ...c, imageUrl: c.image }));
+  if (categories.length === 0) return null;
   return (
     <section className="py-10 max-w-7xl mx-auto px-4">
       <SectionHeader
         title={isAr ? "فئاتنا" : "Nos Catégories"}
-        viewAllHref={`/${locale}/categories`}
+        viewAllHref={`/${locale}/recherche`}
         viewAllLabel={isAr ? "عرض الكل" : "Voir tout"}
       />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {cats.map((cat) => (
+        {categories.map((cat) => (
           <CategoryCard
             key={cat.id}
             slug={cat.slug}
@@ -170,9 +170,10 @@ function CategorySection({ locale, apiCategories }: {
 }
 
 /* ────────────── Flash Sales ────────────── */
-function FlashSaleSection({ locale }: { locale: string }) {
+function FlashSaleSection({ locale, products }: { locale: string; products: ProductSummaryDto[] }) {
   const isAr = locale === "ar";
   const endsAt = new Date(Date.now() + 4 * 3600000 + 27 * 60000 + 14000);
+  if (products.length === 0) return null;
 
   return (
     <section className="py-6 bg-souk-green-900">
@@ -197,56 +198,61 @@ function FlashSaleSection({ locale }: { locale: string }) {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {MOCK_FLASH_PRODUCTS.map((p) => (
-            <Link key={p.id} href={`/${locale}/produits/${p.slug}`} className="group bg-souk-green-800 rounded-xl overflow-hidden hover:bg-souk-green-700 transition-colors">
-              <div className="relative aspect-square overflow-hidden">
-                <Image src={p.image} alt={p.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-souk-green-900/60 to-transparent" />
-                <div className="absolute top-2 start-2">
-                  <span className="bg-souk-terracotta-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                    -{calculateFlashDiscount(p.originalPrice, p.flashPrice)}%
-                  </span>
+          {products.map((p) => {
+            const discount = p.originalPrice && p.originalPrice > p.price
+              ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
+              : null;
+            return (
+              <Link key={p.id} href={`/${locale}/products/${p.slug}`} className="group bg-souk-green-800 rounded-xl overflow-hidden hover:bg-souk-green-700 transition-colors">
+                <div className="relative aspect-square overflow-hidden">
+                  {p.image && (
+                    <Image src={p.image} alt={isAr ? p.nameAr : p.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-souk-green-900/60 to-transparent" />
+                  {discount && (
+                    <div className="absolute top-2 start-2">
+                      <span className="bg-souk-terracotta-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                        -{discount}%
+                      </span>
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className="p-3">
-                <p className="text-white text-xs font-semibold line-clamp-2 leading-snug mb-2">{isAr ? p.nameAr : p.name}</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-souk-gold-400 font-bold text-sm">{p.flashPrice} MAD</span>
-                  <span className="text-souk-green-400 text-xs line-through">{p.originalPrice} MAD</span>
+                <div className="p-3">
+                  <p className="text-white text-xs font-semibold line-clamp-2 leading-snug mb-2">
+                    {isAr ? p.nameAr : p.name}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-souk-gold-400 font-bold text-sm">{p.price} MAD</span>
+                    {p.originalPrice && p.originalPrice > p.price && (
+                      <span className="text-souk-green-400 text-xs line-through">{p.originalPrice} MAD</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
 
-function calculateFlashDiscount(original: number, sale: number) {
-  return Math.round(((original - sale) / original) * 100);
-}
-
 /* ────────────── Featured Products ────────────── */
-function FeaturedProductsSection({ locale, apiProducts }: {
+function FeaturedProductsSection({ locale, products }: {
   locale: string;
-  apiProducts: ProductSummaryDto[] | null;
+  products: ProductSummaryDto[];
 }) {
   const isAr = locale === "ar";
-  const items = apiProducts ?? MOCK_PRODUCTS.map((p) => ({
-    ...p, image: p.image, originalPrice: p.originalPrice !== p.price ? p.originalPrice : null,
-    vendor: { ...p.vendor, artisan: p.vendor.artisan, verified: p.vendor.verified },
-    badge: p.badge as string, city: p.city, inStock: p.inStock,
-  }));
+  if (products.length === 0) return null;
   return (
     <section className="py-10 max-w-7xl mx-auto px-4">
       <SectionHeader
         title={isAr ? "منتجات مميزة" : "Produits Vedettes"}
-        viewAllHref={`/${locale}/produits`}
+        viewAllHref={`/${locale}/recherche`}
         viewAllLabel={isAr ? "عرض الكل" : "Voir tout"}
       />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {items.map((p) => (
+        {products.map((p) => (
           <ProductCard
             key={p.id}
             id={p.id}
@@ -258,7 +264,7 @@ function FeaturedProductsSection({ locale, apiProducts }: {
             rating={p.rating}
             reviewCount={p.reviewCount}
             vendor={p.vendor}
-            badge={(p.badge?.toLowerCase() as "artisan" | "sale" | "new" | "top" | "flash" | undefined)}
+            badge={p.badge?.toLowerCase() as "artisan" | "sale" | "new" | "top" | "flash" | undefined}
             inStock={p.inStock}
             freeDelivery={p.freeDelivery}
             locale={locale}
@@ -312,14 +318,12 @@ function ArtisanSection({ locale }: { locale: string }) {
 }
 
 /* ────────────── Vendors ────────────── */
-function VendorSection({ locale, apiVendors }: {
+function VendorSection({ locale, vendors }: {
   locale: string;
-  apiVendors: VendorSummaryDto[] | null;
+  vendors: VendorSummaryDto[];
 }) {
   const isAr = locale === "ar";
-  const items = apiVendors ?? MOCK_VENDORS.map((v) => ({
-    ...v, avatarUrl: v.avatar, bannerUrl: v.banner, nameAr: "",
-  }));
+  if (vendors.length === 0) return null;
   return (
     <section className="py-10 max-w-7xl mx-auto px-4">
       <SectionHeader
@@ -328,7 +332,7 @@ function VendorSection({ locale, apiVendors }: {
         viewAllLabel={isAr ? "عرض الكل" : "Voir tout"}
       />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {items.map((v) => (
+        {vendors.map((v) => (
           <VendorCard
             key={v.id}
             slug={v.slug}

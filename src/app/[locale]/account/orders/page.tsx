@@ -40,7 +40,7 @@ export default function OrdersPage() {
         <p className="text-lg font-semibold text-gray-800">
           {isAr ? "يجب تسجيل الدخول" : "Connexion requise"}
         </p>
-        <Button onClick={() => router.push(`/${locale}/connexion`)}>
+        <Button onClick={() => router.push(`/${locale}/login`)}>
           {isAr ? "تسجيل الدخول" : "Se connecter"}
         </Button>
       </div>
@@ -83,7 +83,7 @@ export default function OrdersPage() {
           <p className="text-sm text-gray-400 max-w-xs">
             {isAr ? "ابدأ التسوق واكتشف آلاف المنتجات المغربية الأصيلة" : "Commencez vos achats et découvrez des milliers de produits marocains authentiques"}
           </p>
-          <Link href={`/${locale}/categories`}>
+          <Link href={`/${locale}`}>
             <Button>{isAr ? "تسوق الآن" : "Commencer mes achats"}</Button>
           </Link>
         </div>

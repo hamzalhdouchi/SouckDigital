@@ -48,7 +48,7 @@ export default function ProductCard({
 
   if (variant === "list") {
     return (
-      <Link href={`/${locale}/produits/${slug}`} className="group flex gap-4 bg-white rounded-xl border border-gray-100 p-3 hover:shadow-md transition-shadow">
+      <Link href={`/${locale}/products/${slug}`} className="group flex gap-4 bg-white rounded-xl border border-gray-100 p-3 hover:shadow-md transition-shadow">
         <div className="relative h-28 w-28 rounded-lg overflow-hidden shrink-0 bg-souk-sand">
           <Image src={image} alt={name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
         </div>
@@ -73,7 +73,7 @@ export default function ProductCard({
   }
 
   return (
-    <Link href={`/${locale}/produits/${slug}`} className="group relative bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 flex flex-col">
+    <Link href={`/${locale}/products/${slug}`} className="group relative bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 flex flex-col">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-souk-sand">
         <Image

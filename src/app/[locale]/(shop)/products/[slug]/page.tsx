@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod/v4";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
   Heart, Share2, ShoppingCart, Truck, RefreshCw, Shield, Star,
   CheckCircle, MessageCircle, Zap, ChevronLeft, ChevronRight,
-  Award, X, ZoomIn, Clock, AlertCircle,
+  Award, X, ZoomIn, Clock, AlertCircle, Send,
 } from "lucide-react";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
@@ -15,8 +18,9 @@ import Rating from "@/components/ui/rating";
 import ProductCard from "@/components/modules/product-card";
 import { ProductDetailSkeleton } from "@/components/skeletons/product-detail-skeleton";
 import { useCartStore } from "@/lib/store/cart";
+import { useAuthStore } from "@/lib/store/auth";
 import { useProduct, useRelatedProducts } from "@/lib/hooks/use-products";
-import { useReviews, useReviewStats } from "@/lib/hooks/use-reviews";
+import { useReviews, useReviewStats, useAddReview } from "@/lib/hooks/use-reviews";
 import { cn, formatPriceSimple, calculateDiscount } from "@/lib/utils";
 import type { ReviewDetailDto, ReviewStatsDto } from "@/lib/api/types";
 
@@ -29,6 +33,7 @@ export default function ProductDetailPage() {
   const slug   = params.slug as string;
   const isAr   = locale === "ar";
 
+  const { user } = useAuthStore();
   const { data: product, isLoading, isError } = useProduct(slug);
   const { data: relatedData } = useRelatedProducts(product?.id ?? "");
   const { data: reviewPages, fetchNextPage, hasNextPage } = useReviews(product?.id ?? "");
@@ -60,7 +65,7 @@ export default function ProductDetailPage() {
         <p className="text-lg font-semibold text-gray-700">
           {isAr ? "المنتج غير موجود" : "Produit introuvable"}
         </p>
-        <Link href={`/${locale}/categories`}>
+        <Link href={`/${locale}`}>
           <Button>{isAr ? "متابعة التسوق" : "Continuer mes achats"}</Button>
         </Link>
       </div>
@@ -368,6 +373,9 @@ export default function ProductDetailPage() {
                 hasNextPage={!!hasNextPage}
                 fetchNextPage={fetchNextPage}
                 isAr={isAr}
+                productId={product.id}
+                isLoggedIn={!!user}
+                locale={locale}
               />
             )}
           </div>
@@ -450,12 +458,119 @@ export default function ProductDetailPage() {
   );
 }
 
-function ReviewsSection({ stats, reviews, hasNextPage, fetchNextPage, isAr }: {
+const reviewSchema = z.object({
+  rating: z.number().min(1).max(5),
+  comment: z.string().optional().refine((v) => !v || v.length >= 10, {
+    message: "Minimum 10 caractères / 10 أحرف على الأقل",
+  }),
+});
+type ReviewFormData = z.infer<typeof reviewSchema>;
+
+function WriteReviewForm({ productId, isAr, locale }: { productId: string; isAr: boolean; locale: string }) {
+  const { mutate, isPending, isSuccess, isError, reset } = useAddReview(productId);
+  const { control, register, handleSubmit, setValue, watch, formState: { errors }, reset: resetForm } = useForm<ReviewFormData>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: { rating: 0, comment: "" },
+  });
+  const rating = watch("rating");
+
+  const onSubmit = (data: ReviewFormData) => {
+    mutate(
+      { rating: data.rating, comment: data.comment || undefined },
+      {
+        onSuccess: () => resetForm(),
+      }
+    );
+  };
+
+  if (isSuccess) {
+    return (
+      <div className="bg-souk-green-50 border border-souk-green-200 rounded-xl p-5 flex items-center gap-3 text-souk-green-800">
+        <CheckCircle size={20} className="shrink-0" />
+        <div>
+          <p className="font-semibold text-sm">{isAr ? "شكراً على تقييمك!" : "Merci pour votre avis !"}</p>
+          <button onClick={() => { reset(); resetForm(); }} className="text-xs underline mt-0.5 opacity-70 hover:opacity-100">
+            {isAr ? "إضافة تقييم آخر" : "Laisser un autre avis"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+      <h3 className="font-bold text-gray-900 text-sm">
+        {isAr ? "اكتب تقييمك" : "Laisser un avis"}
+      </h3>
+
+      {/* Star picker */}
+      <Controller
+        control={control}
+        name="rating"
+        render={() => (
+          <div>
+            <p className="text-xs text-gray-500 mb-1.5">{isAr ? "تقييمك *" : "Votre note *"}</p>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setValue("rating", s, { shouldValidate: true })}
+                  className="p-0.5 transition-transform hover:scale-110"
+                >
+                  <Star
+                    size={28}
+                    className={s <= rating ? "fill-souk-gold-500 text-souk-gold-500" : "fill-gray-200 text-gray-200"}
+                  />
+                </button>
+              ))}
+            </div>
+            {errors.rating && (
+              <p className="text-xs text-red-500 mt-1">{isAr ? "يرجى اختيار تقييم" : "Veuillez choisir une note"}</p>
+            )}
+          </div>
+        )}
+      />
+
+      {/* Comment */}
+      <div>
+        <label className="block text-xs text-gray-500 mb-1.5">
+          {isAr ? "تعليق (اختياري)" : "Commentaire (optionnel)"}
+        </label>
+        <textarea
+          {...register("comment")}
+          rows={3}
+          placeholder={isAr ? "شاركنا تجربتك مع هذا المنتج..." : "Partagez votre expérience avec ce produit…"}
+          className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-souk-green-500"
+        />
+        {errors.comment && (
+          <p className="text-xs text-red-500 mt-1">{errors.comment.message}</p>
+        )}
+      </div>
+
+      {isError && (
+        <p className="text-xs text-red-500 flex items-center gap-1">
+          <AlertCircle size={12} />
+          {isAr ? "فشل إرسال التقييم، حاول مجدداً" : "Échec de l'envoi, veuillez réessayer"}
+        </p>
+      )}
+
+      <Button type="submit" size="sm" loading={isPending} leftIcon={<Send size={14} />}>
+        {isAr ? "إرسال التقييم" : "Envoyer l'avis"}
+      </Button>
+    </form>
+  );
+}
+
+function ReviewsSection({ stats, reviews, hasNextPage, fetchNextPage, isAr, productId, isLoggedIn, locale }: {
   stats: ReviewStatsDto | undefined;
   reviews: ReviewDetailDto[];
   hasNextPage: boolean;
   fetchNextPage: () => void;
   isAr: boolean;
+  productId: string;
+  isLoggedIn: boolean;
+  locale: string;
 }) {
   return (
     <div className="space-y-6">
@@ -482,6 +597,20 @@ function ReviewsSection({ stats, reviews, hasNextPage, fetchNextPage, isAr }: {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Write a review */}
+      {isLoggedIn ? (
+        <WriteReviewForm productId={productId} isAr={isAr} locale={locale} />
+      ) : (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center">
+          <p className="text-sm text-gray-600 mb-3">
+            {isAr ? "سجّل الدخول لكتابة تقييم" : "Connectez-vous pour laisser un avis"}
+          </p>
+          <Link href={`/${locale}/login`}>
+            <Button size="sm" variant="outline">{isAr ? "تسجيل الدخول" : "Se connecter"}</Button>
+          </Link>
         </div>
       )}
 

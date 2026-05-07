@@ -1,13 +1,23 @@
+import { Suspense } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { Cairo } from "next/font/google";
 import { routing, isRTL } from "@/i18n/routing";
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-cairo",
+  display: "swap",
+});
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MobileNav from "@/components/layout/mobile-nav";
 import CartDrawer from "@/components/layout/cart-drawer";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { AuthHydration } from "@/components/providers/auth-hydration";
 import { Toaster } from "sonner";
 
 interface Props {
@@ -41,15 +51,19 @@ export default async function LocaleLayout({ children, params }: Props) {
   const dir = isRTL(locale) ? "rtl" : "ltr";
 
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning className={cairo.variable}>
       <body className="min-h-screen flex flex-col bg-souk-sand font-cairo antialiased">
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
-            <Header locale={locale} />
-            <main className="flex-1">{children}</main>
-            <Footer locale={locale} />
-            <MobileNav locale={locale} />
-            <CartDrawer locale={locale} isAr={isRTL(locale)} />
+            <AuthHydration>
+              <Suspense>
+                <Header locale={locale} />
+              </Suspense>
+              <main className="flex-1">{children}</main>
+              <Footer locale={locale} />
+              <MobileNav locale={locale} />
+              <CartDrawer locale={locale} isAr={isRTL(locale)} />
+            </AuthHydration>
             <Toaster richColors position="top-right" />
           </QueryProvider>
         </NextIntlClientProvider>

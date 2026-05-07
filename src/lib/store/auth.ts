@@ -27,6 +27,22 @@ interface AuthStore {
   apiLogin: (data: LoginRequest) => Promise<void>;
 }
 
+const cookieStorage = {
+  getItem: (name: string): string | null => {
+    if (typeof document === "undefined") return null;
+    const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+    return match ? decodeURIComponent(match[2]) : null;
+  },
+  setItem: (name: string, value: string): void => {
+    if (typeof document === "undefined") return;
+    document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=604800;samesite=lax`;
+  },
+  removeItem: (name: string): void => {
+    if (typeof document === "undefined") return;
+    document.cookie = `${name}=;path=/;max-age=0`;
+  },
+};
+
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
@@ -82,7 +98,7 @@ export const useAuthStore = create<AuthStore>()(
         });
       },
     }),
-    { name: "souk-auth" }
+    { name: "souk-auth", storage: cookieStorage }
   )
 );
 
