@@ -49,8 +49,6 @@ export default function NewProductPage() {
     register,
     handleSubmit,
     control,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -77,7 +75,6 @@ export default function NewProductPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href={`/${locale}/vendeur/dashboard`} className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
           <ArrowLeft size={18} className="rtl:rotate-180" />
@@ -94,142 +91,58 @@ export default function NewProductPage() {
       </div>
 
       <form onSubmit={onSubmit} className="space-y-6">
-        {/* Images */}
         <section className="bg-white rounded-2xl border border-gray-100 p-5">
           <h2 className="font-bold text-gray-900 mb-4">{isAr ? "صور المنتج" : "Photos du produit"}</h2>
           <Controller
             name="imageUrls"
             control={control}
             render={({ field }) => (
-              <ImageUpload
-                value={field.value}
-                onChange={field.onChange}
-                folder="products"
-                maxFiles={5}
-                isAr={isAr}
-              />
+              <ImageUpload value={field.value} onChange={field.onChange} folder="products" maxFiles={5} isAr={isAr} />
             )}
           />
-          {errors.imageUrls && (
-            <p className="text-sm text-red-500 mt-2">{errors.imageUrls.message}</p>
-          )}
+          {errors.imageUrls && <p className="text-sm text-red-500 mt-2">{errors.imageUrls.message}</p>}
         </section>
 
-        {/* Names */}
         <section className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
           <h2 className="font-bold text-gray-900">{isAr ? "التسمية" : "Dénomination"}</h2>
-          <Input
-            label={isAr ? "اسم المنتج (بالفرنسية)" : "Nom du produit (français)"}
-            placeholder={isAr ? "مثال: Théière en cuivre" : "Ex: Théière en cuivre"}
-            fullWidth
-            error={errors.name?.message}
-            {...register("name")}
-          />
-          <Input
-            label={isAr ? "اسم المنتج (بالعربية)" : "Nom du produit (arabe)"}
-            placeholder="مثال: إبريق نحاسي"
-            fullWidth
-            dir="rtl"
-            error={errors.nameAr?.message}
-            {...register("nameAr")}
-          />
+          <Input label={isAr ? "اسم المنتج (بالفرنسية)" : "Nom du produit (français)"} placeholder="Ex: Théière en cuivre" fullWidth error={errors.name?.message} {...register("name")} />
+          <Input label={isAr ? "اسم المنتج (بالعربية)" : "Nom du produit (arabe)"} placeholder="مثال: إبريق نحاسي" fullWidth dir="rtl" error={errors.nameAr?.message} {...register("nameAr")} />
         </section>
 
-        {/* Descriptions */}
         <section className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
           <h2 className="font-bold text-gray-900">{isAr ? "الوصف" : "Description"}</h2>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {isAr ? "الوصف (بالفرنسية)" : "Description (français)"}
-            </label>
-            <textarea
-              rows={4}
-              placeholder={isAr ? "وصف المنتج بالفرنسية..." : "Décrivez votre produit en français..."}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-souk-green-500 resize-none"
-              {...register("description")}
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">{isAr ? "الوصف (بالفرنسية)" : "Description (français)"}</label>
+            <textarea rows={4} placeholder={isAr ? "وصف المنتج بالفرنسية..." : "Décrivez votre produit en français..."} className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-souk-green-500 resize-none" {...register("description")} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {isAr ? "الوصف (بالعربية)" : "Description (arabe)"}
-            </label>
-            <textarea
-              rows={4}
-              dir="rtl"
-              placeholder="وصف المنتج بالعربية..."
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-souk-green-500 resize-none"
-              {...register("descriptionAr")}
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">{isAr ? "الوصف (بالعربية)" : "Description (arabe)"}</label>
+            <textarea rows={4} dir="rtl" placeholder="وصف المنتج بالعربية..." className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-souk-green-500 resize-none" {...register("descriptionAr")} />
           </div>
         </section>
 
-        {/* Pricing & Stock */}
         <section className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
           <h2 className="font-bold text-gray-900">{isAr ? "السعر والمخزون" : "Prix & Stock"}</h2>
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              label={isAr ? "السعر (MAD)" : "Prix (MAD)"}
-              type="number"
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              fullWidth
-              error={errors.price?.message}
-              {...register("price")}
-            />
-            <Input
-              label={isAr ? "السعر الأصلي (MAD) — اختياري" : "Prix original (MAD) — optionnel"}
-              type="number"
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              hint={isAr ? "اتركه فارغاً إن لم يكن هناك تخفيض" : "Laissez vide si pas de promo"}
-              fullWidth
-              error={errors.originalPrice?.message}
-              {...register("originalPrice")}
-            />
+            <Input label={isAr ? "السعر (MAD)" : "Prix (MAD)"} type="number" placeholder="0.00" min="0" step="0.01" fullWidth error={errors.price?.message} {...register("price")} />
+            <Input label={isAr ? "السعر الأصلي — اختياري" : "Prix original — optionnel"} type="number" placeholder="0.00" min="0" step="0.01" hint={isAr ? "اتركه فارغاً إن لم يكن هناك تخفيض" : "Laissez vide si pas de promo"} fullWidth error={errors.originalPrice?.message} {...register("originalPrice")} />
           </div>
-          <Input
-            label={isAr ? "الكمية المتاحة" : "Quantité en stock"}
-            type="number"
-            placeholder="0"
-            min="0"
-            fullWidth
-            error={errors.stockCount?.message}
-            {...register("stockCount")}
-          />
+          <Input label={isAr ? "الكمية المتاحة" : "Quantité en stock"} type="number" placeholder="0" min="0" fullWidth error={errors.stockCount?.message} {...register("stockCount")} />
         </section>
 
-        {/* Category & Badge */}
         <section className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
           <h2 className="font-bold text-gray-900">{isAr ? "التصنيف والعلامة" : "Catégorie & Badge"}</h2>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {isAr ? "الفئة *" : "Catégorie *"}
-            </label>
-            <select
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-souk-green-500 bg-white"
-              {...register("categoryId")}
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-1">{isAr ? "الفئة *" : "Catégorie *"}</label>
+            <select className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-souk-green-500 bg-white" {...register("categoryId")}>
               <option value="">{isAr ? "اختر فئة" : "Choisir une catégorie"}</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {isAr ? cat.nameAr : cat.name}
-                </option>
-              ))}
+              {categories.map((cat) => <option key={cat.id} value={cat.id}>{isAr ? cat.nameAr : cat.name}</option>)}
             </select>
-            {errors.categoryId && (
-              <p className="text-sm text-red-500 mt-1">{errors.categoryId.message}</p>
-            )}
+            {errors.categoryId && <p className="text-sm text-red-500 mt-1">{errors.categoryId.message}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {isAr ? "العلامة — اختياري" : "Badge — optionnel"}
-            </label>
-            <select
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-souk-green-500 bg-white"
-              {...register("badge")}
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-1">{isAr ? "العلامة — اختياري" : "Badge — optionnel"}</label>
+            <select className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-souk-green-500 bg-white" {...register("badge")}>
               <option value="">{isAr ? "بدون علامة" : "Aucun badge"}</option>
               <option value="NEW">{isAr ? "جديد" : "Nouveau"}</option>
               <option value="SALE">{isAr ? "تخفيض" : "Promo"}</option>
@@ -240,24 +153,15 @@ export default function NewProductPage() {
           </div>
         </section>
 
-        {/* Delivery */}
         <section className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
           <h2 className="font-bold text-gray-900">{isAr ? "التوصيل" : "Livraison"}</h2>
-          <Input
-            label={isAr ? "المدينة" : "Ville"}
-            placeholder={isAr ? "مثال: Marrakech" : "Ex: Marrakech"}
-            fullWidth
-            {...register("city")}
-          />
+          <Input label={isAr ? "المدينة" : "Ville"} placeholder={isAr ? "مثال: Marrakech" : "Ex: Marrakech"} fullWidth {...register("city")} />
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-souk-green-800 focus:ring-souk-green-500" {...register("freeDelivery")} />
-            <span className="text-sm font-medium text-gray-700">
-              {isAr ? "توصيل مجاني" : "Livraison gratuite"}
-            </span>
+            <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-souk-green-700 focus:ring-souk-green-500" {...register("freeDelivery")} />
+            <span className="text-sm font-medium text-gray-700">{isAr ? "توصيل مجاني" : "Livraison gratuite"}</span>
           </label>
         </section>
 
-        {/* Submit */}
         {createProduct.isError && (
           <p className="text-sm text-red-500 text-center">
             {(createProduct.error as Error)?.message ?? (isAr ? "حدث خطأ" : "Une erreur s'est produite")}
@@ -266,9 +170,7 @@ export default function NewProductPage() {
 
         <div className="flex gap-3 pb-6">
           <Link href={`/${locale}/vendeur/dashboard`} className="flex-1">
-            <Button variant="outline" fullWidth type="button">
-              {isAr ? "إلغاء" : "Annuler"}
-            </Button>
+            <Button variant="outline" fullWidth type="button">{isAr ? "إلغاء" : "Annuler"}</Button>
           </Link>
           <Button type="submit" fullWidth loading={isSubmitting} leftIcon={<Save size={16} />}>
             {isAr ? "نشر المنتج" : "Publier le produit"}

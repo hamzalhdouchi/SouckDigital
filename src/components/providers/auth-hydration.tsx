@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
+// Render children immediately — Zustand persist stores handle their own
+// rehydration from cookies/localStorage without blocking first paint.
 export function AuthHydration({ children }: { children: React.ReactNode }) {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-  if (!hydrated) return null;
   return <>{children}</>;
 }

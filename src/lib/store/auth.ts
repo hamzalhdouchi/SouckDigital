@@ -27,15 +27,19 @@ interface AuthStore {
   apiLogin: (data: LoginRequest) => Promise<void>;
 }
 
+// Zustand v5 persist passes the state as a plain object to setItem (not pre-stringified).
+// We must JSON.stringify it ourselves before writing to the cookie, and JSON.parse on read.
 const cookieStorage = {
-  getItem: (name: string): string | null => {
+  getItem: (name: string): unknown => {
     if (typeof document === "undefined") return null;
     const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-    return match ? decodeURIComponent(match[2]) : null;
+    if (!match) return null;
+    try { return JSON.parse(decodeURIComponent(match[2])); } catch { return null; }
   },
-  setItem: (name: string, value: string): void => {
+  setItem: (name: string, value: unknown): void => {
     if (typeof document === "undefined") return;
-    document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=604800;samesite=lax`;
+    const str = typeof value === "string" ? value : JSON.stringify(value);
+    document.cookie = `${name}=${encodeURIComponent(str)};path=/;max-age=604800;samesite=lax`;
   },
   removeItem: (name: string): void => {
     if (typeof document === "undefined") return;

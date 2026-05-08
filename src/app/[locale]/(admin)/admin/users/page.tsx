@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Shield, Ban, UserCheck, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Ban, UserCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { adminApi } from "@/lib/api/admin";
@@ -35,6 +35,7 @@ export default function AdminUsersPage() {
       ban ? adminApi.banUser(id) : adminApi.unbanUser(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-users"] }),
   });
+  // verified=false means banned in this backend
 
   const roleMutation = useMutation({
     mutationFn: ({ id, role }: { id: string; role: Role }) =>
@@ -66,7 +67,6 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Search */}
       <form onSubmit={handleSearch} className="flex gap-3 mb-5">
         <div className="relative flex-1 max-w-sm">
           <Search size={15} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -100,7 +100,7 @@ export default function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {users.map((u) => (
-                  <tr key={u.id} className={cn("hover:bg-gray-50/50 transition-colors", u.banned && "opacity-60")}>
+                  <tr key={u.id} className={cn("hover:bg-gray-50/50 transition-colors", !u.verified && "opacity-60")}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-full bg-souk-green-100 flex items-center justify-center text-souk-green-800 font-bold text-xs shrink-0">
@@ -117,10 +117,7 @@ export default function AdminUsersPage() {
                       <select
                         value={u.role}
                         onChange={(e) => roleMutation.mutate({ id: u.id, role: e.target.value as Role })}
-                        className={cn(
-                          "text-xs font-semibold px-2.5 py-1 rounded-full cursor-pointer focus:outline-none",
-                          ROLE_COLOR[u.role],
-                        )}
+                        className={cn("text-xs font-semibold px-2.5 py-1 rounded-full cursor-pointer focus:outline-none", ROLE_COLOR[u.role])}
                       >
                         <option value="BUYER">BUYER</option>
                         <option value="VENDOR">VENDOR</option>
@@ -131,26 +128,23 @@ export default function AdminUsersPage() {
                       {new Date(u.createdAt).toLocaleDateString(isAr ? "ar-MA" : "fr-MA")}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={cn(
-                        "text-xs font-semibold px-2 py-0.5 rounded-full",
-                        u.banned ? "bg-red-100 text-red-600" : "bg-emerald-100 text-emerald-600",
-                      )}>
-                        {u.banned ? (isAr ? "محظور" : "Banni") : (isAr ? "نشط" : "Actif")}
+                      <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full",
+                        !u.verified ? "bg-red-100 text-red-600" : "bg-emerald-100 text-emerald-600")}>
+                        {!u.verified ? (isAr ? "محظور" : "Banni") : (isAr ? "نشط" : "Actif")}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => banMutation.mutate({ id: u.id, ban: !u.banned })}
+                        onClick={() => banMutation.mutate({ id: u.id, ban: u.verified })}
                         className={cn(
                           "flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
-                          u.banned
+                          !u.verified
                             ? "border-emerald-200 text-emerald-600 hover:bg-emerald-50"
                             : "border-red-200 text-red-500 hover:bg-red-50",
                         )}
-                        title={u.banned ? (isAr ? "إلغاء الحظر" : "Débannir") : (isAr ? "حظر" : "Bannir")}
                       >
-                        {u.banned ? <UserCheck size={14} /> : <Ban size={14} />}
-                        {u.banned ? (isAr ? "إلغاء الحظر" : "Débannir") : (isAr ? "حظر" : "Bannir")}
+                        {!u.verified ? <UserCheck size={14} /> : <Ban size={14} />}
+                        {!u.verified ? (isAr ? "إلغاء الحظر" : "Débannir") : (isAr ? "حظر" : "Bannir")}
                       </button>
                     </td>
                   </tr>
@@ -161,22 +155,15 @@ export default function AdminUsersPage() {
         )}
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-4">
-          <Button
-            variant="outline" size="sm"
-            onClick={() => setPage((p) => p - 1)} disabled={page === 0}
-            leftIcon={<ChevronLeft size={14} className="rtl:rotate-180" />}
-          >
+          <Button variant="outline" size="sm" onClick={() => setPage((p) => p - 1)} disabled={page === 0}
+            leftIcon={<ChevronLeft size={14} className="rtl:rotate-180" />}>
             {isAr ? "السابق" : "Précédent"}
           </Button>
           <span className="text-sm text-gray-500">{page + 1} / {totalPages}</span>
-          <Button
-            variant="outline" size="sm"
-            onClick={() => setPage((p) => p + 1)} disabled={page >= totalPages - 1}
-            rightIcon={<ChevronRight size={14} className="rtl:rotate-180" />}
-          >
+          <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} disabled={page >= totalPages - 1}
+            rightIcon={<ChevronRight size={14} className="rtl:rotate-180" />}>
             {isAr ? "التالي" : "Suivant"}
           </Button>
         </div>

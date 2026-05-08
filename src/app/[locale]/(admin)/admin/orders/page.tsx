@@ -12,13 +12,13 @@ import type { OrderStatus } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
 const STATUS_META: Record<OrderStatus, { labelFr: string; labelAr: string; color: string }> = {
-  PENDING:    { labelFr: "En attente",    labelAr: "في الانتظار",   color: "text-gray-600 bg-gray-50 border-gray-200" },
-  CONFIRMED:  { labelFr: "Confirmée",     labelAr: "مؤكد",          color: "text-blue-600 bg-blue-50 border-blue-200" },
-  PROCESSING: { labelFr: "En traitement", labelAr: "قيد المعالجة",  color: "text-amber-600 bg-amber-50 border-amber-200" },
-  SHIPPED:    { labelFr: "En livraison",  labelAr: "في الطريق",     color: "text-indigo-600 bg-indigo-50 border-indigo-200" },
-  DELIVERED:  { labelFr: "Livré",         labelAr: "مُسلَّم",       color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
-  CANCELLED:  { labelFr: "Annulée",       labelAr: "ملغاة",         color: "text-red-600 bg-red-50 border-red-200" },
-  REFUNDED:   { labelFr: "Remboursée",    labelAr: "مُسترجع",       color: "text-purple-600 bg-purple-50 border-purple-200" },
+  PENDING:    { labelFr: "En attente",    labelAr: "في الانتظار",  color: "text-gray-600 bg-gray-50 border-gray-200" },
+  CONFIRMED:  { labelFr: "Confirmée",     labelAr: "مؤكد",         color: "text-blue-600 bg-blue-50 border-blue-200" },
+  PROCESSING: { labelFr: "En traitement", labelAr: "قيد المعالجة", color: "text-amber-600 bg-amber-50 border-amber-200" },
+  SHIPPED:    { labelFr: "En livraison",  labelAr: "في الطريق",    color: "text-indigo-600 bg-indigo-50 border-indigo-200" },
+  DELIVERED:  { labelFr: "Livré",         labelAr: "مُسلَّم",      color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
+  CANCELLED:  { labelFr: "Annulée",       labelAr: "ملغاة",        color: "text-red-600 bg-red-50 border-red-200" },
+  REFUNDED:   { labelFr: "Remboursée",    labelAr: "مُسترجع",      color: "text-purple-600 bg-purple-50 border-purple-200" },
 };
 
 const ALL_STATUSES = Object.keys(STATUS_META) as OrderStatus[];
@@ -57,11 +57,7 @@ export default function AdminOrdersPage() {
           <h1 className="text-xl font-black text-gray-900">
             {isAr ? "إدارة الطلبات" : "Gestion des commandes"}
           </h1>
-          {data && (
-            <p className="text-sm text-gray-500 mt-0.5">
-              {data.totalElements} {isAr ? "طلب" : "commandes"}
-            </p>
-          )}
+          {data && <p className="text-sm text-gray-500 mt-0.5">{data.totalElements} {isAr ? "طلب" : "commandes"}</p>}
         </div>
         <select
           value={filterStatus}
@@ -70,9 +66,7 @@ export default function AdminOrdersPage() {
         >
           <option value="">{isAr ? "كل الحالات" : "Tous les statuts"}</option>
           {ALL_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {isAr ? STATUS_META[s].labelAr : STATUS_META[s].labelFr}
-            </option>
+            <option key={s} value={s}>{isAr ? STATUS_META[s].labelAr : STATUS_META[s].labelFr}</option>
           ))}
         </select>
       </div>
@@ -103,12 +97,8 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-3 text-sm font-mono font-semibold text-souk-green-800">
                         #{order.id.slice(0, 8).toUpperCase()}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 max-w-[180px] truncate">
-                        {order.firstItemName}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-bold text-gray-900">
-                        {formatPrice(order.total, locale)}
-                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600 max-w-[180px] truncate">{order.firstItemName}</td>
+                      <td className="px-4 py-3 text-sm font-bold text-gray-900">{formatPrice(order.total, locale)}</td>
                       <td className="px-4 py-3 text-xs text-gray-400">
                         {new Date(order.createdAt).toLocaleDateString(isAr ? "ar-MA" : "fr-MA")}
                       </td>
@@ -116,15 +106,10 @@ export default function AdminOrdersPage() {
                         <select
                           value={order.status}
                           onChange={(e) => statusMutation.mutate({ id: order.id, status: e.target.value as OrderStatus })}
-                          className={cn(
-                            "text-xs font-semibold px-2.5 py-1 rounded-full border cursor-pointer focus:outline-none",
-                            meta.color,
-                          )}
+                          className={cn("text-xs font-semibold px-2.5 py-1 rounded-full border cursor-pointer focus:outline-none", meta.color)}
                         >
                           {ALL_STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {isAr ? STATUS_META[s].labelAr : STATUS_META[s].labelFr}
-                            </option>
+                            <option key={s} value={s}>{isAr ? STATUS_META[s].labelAr : STATUS_META[s].labelFr}</option>
                           ))}
                         </select>
                       </td>

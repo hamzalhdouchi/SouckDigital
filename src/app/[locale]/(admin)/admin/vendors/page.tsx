@@ -41,11 +41,7 @@ export default function AdminVendorsPage() {
         <h1 className="text-xl font-black text-gray-900">
           {isAr ? "إدارة البائعين" : "Gestion des vendeurs"}
         </h1>
-        {data && (
-          <p className="text-sm text-gray-500 mt-0.5">
-            {data.totalElements} {isAr ? "بائع" : "vendeurs"}
-          </p>
-        )}
+        {data && <p className="text-sm text-gray-500 mt-0.5">{data.totalElements} {isAr ? "بائع" : "vendeurs"}</p>}
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -77,24 +73,18 @@ export default function AdminVendorsPage() {
                     <td className="px-4 py-3 text-sm text-gray-600">{v.city}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{v.productCount}</td>
                     <td className="px-4 py-3">
-                      <span className="text-sm text-souk-gold-600 font-semibold">
-                        ★ {v.rating.toFixed(1)}
-                      </span>
+                      <span className="text-sm text-souk-gold-600 font-semibold">★ {v.rating.toFixed(1)}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={cn(
-                        "flex items-center gap-1 text-xs font-semibold w-fit",
-                        v.verified ? "text-emerald-600" : "text-gray-400",
-                      )}>
+                      <span className={cn("flex items-center gap-1 text-xs font-semibold w-fit",
+                        v.verified ? "text-emerald-600" : "text-gray-400")}>
                         {v.verified ? <CheckCircle size={14} /> : <XCircle size={14} />}
                         {v.verified ? (isAr ? "محقق" : "Vérifié") : (isAr ? "غير محقق" : "Non vérifié")}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={cn(
-                        "flex items-center gap-1 text-xs font-semibold w-fit",
-                        v.artisan ? "text-souk-gold-600" : "text-gray-400",
-                      )}>
+                      <span className={cn("flex items-center gap-1 text-xs font-semibold w-fit",
+                        v.artisan ? "text-souk-gold-600" : "text-gray-400")}>
                         <Award size={14} />
                         {v.artisan ? (isAr ? "نعم" : "Oui") : (isAr ? "لا" : "Non")}
                       </span>
@@ -103,25 +93,15 @@ export default function AdminVendorsPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => verifyMutation.mutate({ id: v.id, verify: !v.verified })}
-                          className={cn(
-                            "text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
-                            v.verified
-                              ? "border-gray-200 text-gray-500 hover:bg-gray-50"
-                              : "border-emerald-200 text-emerald-600 hover:bg-emerald-50",
-                          )}
+                          className={cn("text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
+                            v.verified ? "border-gray-200 text-gray-500 hover:bg-gray-50" : "border-emerald-200 text-emerald-600 hover:bg-emerald-50")}
                         >
-                          {v.verified
-                            ? (isAr ? "إلغاء التحقق" : "Retirer")
-                            : (isAr ? "تحقق" : "Vérifier")}
+                          {v.verified ? (isAr ? "إلغاء التحقق" : "Retirer") : (isAr ? "تحقق" : "Vérifier")}
                         </button>
                         <button
                           onClick={() => artisanMutation.mutate(v.id)}
-                          className={cn(
-                            "text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
-                            v.artisan
-                              ? "border-souk-gold-200 text-souk-gold-600 hover:bg-souk-gold-50"
-                              : "border-gray-200 text-gray-500 hover:bg-gray-50",
-                          )}
+                          className={cn("text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors",
+                            v.artisan ? "border-souk-gold-200 text-souk-gold-600 hover:bg-souk-gold-50" : "border-gray-200 text-gray-500 hover:bg-gray-50")}
                         >
                           {v.artisan ? (isAr ? "إلغاء الصانع" : "Retirer artisan") : (isAr ? "صانع تقليدي" : "Artisan")}
                         </button>

@@ -45,8 +45,9 @@ export default function proxy(request: NextRequest) {
     const token = getTokenFromRequest(request);
 
     if (!token) {
+      const locale = pathname.match(/^\/([a-z]{2})\//)?.[1] ?? "fr";
       const loginUrl = new URL(
-        `/fr/login?from=${encodeURIComponent(pathname)}`,
+        `/${locale}/login?from=${encodeURIComponent(pathname)}`,
         request.url
       );
       return NextResponse.redirect(loginUrl);

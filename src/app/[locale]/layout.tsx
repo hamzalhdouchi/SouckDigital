@@ -1,10 +1,12 @@
-import { Suspense } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import { routing, isRTL } from "@/i18n/routing";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { AuthHydration } from "@/components/providers/auth-hydration";
+import { Toaster } from "sonner";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -12,13 +14,6 @@ const cairo = Cairo({
   variable: "--font-cairo",
   display: "swap",
 });
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
-import MobileNav from "@/components/layout/mobile-nav";
-import CartDrawer from "@/components/layout/cart-drawer";
-import { QueryProvider } from "@/components/providers/query-provider";
-import { AuthHydration } from "@/components/providers/auth-hydration";
-import { Toaster } from "sonner";
 
 interface Props {
   children: React.ReactNode;
@@ -56,13 +51,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
             <AuthHydration>
-              <Suspense>
-                <Header locale={locale} />
-              </Suspense>
-              <main className="flex-1">{children}</main>
-              <Footer locale={locale} />
-              <MobileNav locale={locale} />
-              <CartDrawer locale={locale} isAr={isRTL(locale)} />
+              {children}
             </AuthHydration>
             <Toaster richColors position="top-right" />
           </QueryProvider>

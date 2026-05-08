@@ -332,9 +332,8 @@ export interface AdminUserDto {
   email: string | null;
   phone: string;
   role: Role;
-  isVerified: boolean;
+  verified: boolean;
   avatarUrl: string | null;
-  banned: boolean;
   createdAt: string;
 }
 

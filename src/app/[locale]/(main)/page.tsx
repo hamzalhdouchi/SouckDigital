@@ -105,18 +105,18 @@ function HeroSection({ locale }: { locale: string }) {
         </div>
 
         {/* Hero image mosaic */}
-        <div className="relative order-1 lg:order-2 h-64 sm:h-80 lg:h-auto">
+        <div className="relative order-1 lg:order-2 h-64 sm:h-80 lg:h-[480px]">
           <div className="grid grid-cols-2 gap-3 h-full">
-            <div className="grid grid-rows-2 gap-3">
-              <div className="relative rounded-2xl overflow-hidden">
-                <Image src="https://images.unsplash.com/photo-1548516173-3cabfa4607e9?w=400&q=80" alt="Artisanat" fill className="object-cover" />
+            <div className="grid grid-rows-2 gap-3 h-full">
+              <div className="relative rounded-2xl overflow-hidden min-h-0">
+                <Image src="https://images.unsplash.com/photo-1548516173-3cabfa4607e9?w=400&q=80" alt="Artisanat" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
               </div>
-              <div className="relative rounded-2xl overflow-hidden">
-                <Image src="https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80" alt="Argan" fill className="object-cover" />
+              <div className="relative rounded-2xl overflow-hidden min-h-0">
+                <Image src="https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80" alt="Argan" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
               </div>
             </div>
             <div className="relative rounded-2xl overflow-hidden">
-              <Image src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=600&q=80" alt="Tapis" fill className="object-cover" />
+              <Image src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=600&q=80" alt="Tapis" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
               <div className="absolute bottom-3 start-3 bg-white/95 backdrop-blur rounded-xl px-3 py-2 shadow-lg">
                 <p className="text-xs font-semibold text-souk-green-800 flex items-center gap-1"><Star size={11} className="text-souk-gold-500 fill-souk-gold-500" />Artisanat certifié</p>
                 <p className="text-xs text-gray-500">+500 artisans partenaires</p>
