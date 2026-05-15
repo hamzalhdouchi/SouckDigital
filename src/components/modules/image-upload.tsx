@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Upload, X, ImagePlus, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,13 +37,16 @@ export function ImageUpload({
   );
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMounted = useRef(false);
 
-  const pushChange = useCallback(
-    (imgs: UploadedImage[]) => {
-      onChange?.(imgs.filter((i) => i.url && !i.uploading && !i.error).map((i) => i.url));
-    },
-    [onChange],
-  );
+  // Notify parent after every images state change, but skip the initial render
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+    onChange?.(images.filter((i) => i.url && !i.uploading && !i.error).map((i) => i.url));
+  }, [images, onChange]);
 
   const uploadFile = async (file: File): Promise<string> => {
     const { uploadApi } = await import("@/lib/api/upload");
@@ -78,17 +81,13 @@ export function ImageUpload({
         uploading: true,
       }));
 
-      setImages((prev) => {
-        const next = [...prev, ...placeholders];
-        pushChange(next);
-        return next;
-      });
+      setImages((prev) => [...prev, ...placeholders]);
 
       const results = await Promise.allSettled(valid.map((f) => uploadFile(f)));
 
       setImages((prev) => {
         const next = [...prev];
-        let pIdx = next.length - valid.length;
+        const pIdx = next.length - valid.length;
         results.forEach((result, i) => {
           const idx = pIdx + i;
           if (result.status === "fulfilled") {
@@ -102,19 +101,14 @@ export function ImageUpload({
             };
           }
         });
-        pushChange(next);
         return next;
       });
     },
-    [images, maxFiles, maxSizeMb, isAr, folder, pushChange],
+    [images, maxFiles, maxSizeMb, isAr, folder],
   );
 
   const removeImage = (idx: number) => {
-    setImages((prev) => {
-      const next = prev.filter((_, i) => i !== idx);
-      pushChange(next);
-      return next;
-    });
+    setImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -221,8 +215,8 @@ export function ImageUpload({
             </p>
             <p className="text-xs text-gray-400 mt-0.5">
               {isAr
-                ? `JPG، PNG، WEBP — حتى ${maxSizeMb}MB للصورة`
-                : `JPG, PNG, WEBP — max ${maxSizeMb}MB par image`}
+                ? `JPG، PNG — حتى ${maxSizeMb}MB للصورة`
+                : `JPG, PNG — max ${maxSizeMb}MB par image`}
             </p>
           </div>
         </div>
@@ -232,7 +226,7 @@ export function ImageUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png"
         multiple={maxFiles > 1}
         onChange={onInputChange}
         className="hidden"

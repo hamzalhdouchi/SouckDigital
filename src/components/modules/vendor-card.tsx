@@ -12,8 +12,8 @@ interface VendorCardProps {
   productCount: number;
   artisan: boolean;
   verified: boolean;
-  avatar: string;
-  banner: string;
+  avatar: string | null | undefined;
+  banner: string | null | undefined;
   locale: string;
 }
 
@@ -22,7 +22,11 @@ export default function VendorCard({ slug, name, city, rating, reviewCount, prod
     <Link href={`/${locale}/vendeurs/${slug}`} className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 block">
       {/* Banner */}
       <div className="relative h-24 overflow-hidden bg-souk-sand">
-        <Image src={banner} alt={name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+        {banner ? (
+          <Image src={banner} alt={name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-souk-green-100 to-souk-gold-100" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
       </div>
 
@@ -30,7 +34,13 @@ export default function VendorCard({ slug, name, city, rating, reviewCount, prod
       <div className="px-4 pb-4">
         <div className="flex items-end gap-3 -mt-6 mb-2">
           <div className="relative h-12 w-12 rounded-xl border-2 border-white shadow-md overflow-hidden bg-white shrink-0">
-            <Image src={avatar} alt={name} fill className="object-cover" />
+            {avatar ? (
+              <Image src={avatar} alt={name} fill className="object-cover" />
+            ) : (
+              <div className="w-full h-full bg-souk-green-100 flex items-center justify-center text-souk-green-700 font-bold text-lg">
+                {name.charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
           <div className="mb-0.5">
             {artisan && (

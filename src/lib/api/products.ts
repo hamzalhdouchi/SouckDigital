@@ -31,7 +31,10 @@ export const productsApi = {
 
   delete: (id: string) => del<void>(`/products/${id}`),
 
-  toggleActive: (id: string) => patch<ProductDetailDto>(`/products/${id}/toggle`),
+  toggleActive: (id: string) => patch<void>(`/products/${id}/toggle`),
+
+  getOwn: (page = 0, size = 50) =>
+    get<Page<ProductSummaryDto>>(`/vendor/dashboard/products?page=${page}&size=${size}`),
 };
 
 // Legacy named exports (keep for backward compat with existing pages)

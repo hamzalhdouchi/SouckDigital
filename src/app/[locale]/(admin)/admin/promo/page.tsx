@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, ToggleLeft, ToggleRight, Tag } from "lucide-react";
+import { toast } from "sonner";
 import Button from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { adminApi } from "@/lib/api/admin";
@@ -32,12 +33,15 @@ export default function AdminPromoPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-promo"] });
       setCode(""); setDiscount(""); setMaxUses(""); setExpiresAt("");
+      toast.success("Code promo créé");
     },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Échec de la création"),
   });
 
   const toggleMutation = useMutation({
     mutationFn: (id: string) => adminApi.togglePromoCode(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-promo"] }),
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Échec de l'opération"),
   });
 
   const handleCreate = (e: React.FormEvent) => {

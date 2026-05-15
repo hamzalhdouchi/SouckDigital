@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, Zap, Award, ChevronRight, Gem, Star, Truck, Banknote, RotateCcw, ShieldCheck } from "lucide-react";
+import { ArrowRight, Zap, Award, ChevronRight, Gem, Star, Truck, Banknote, RotateCcw, ShieldCheck, Search, BadgeCheck } from "lucide-react";
 import ProductCard from "@/components/modules/product-card";
 import CategoryCard from "@/components/modules/category-card";
 import VendorCard from "@/components/modules/vendor-card";
@@ -53,85 +53,238 @@ export default async function HomePage({ params }: Props) {
 
 /* ────────────── Hero ────────────── */
 function HeroSection({ locale }: { locale: string }) {
-  const t = useTranslations("homepage.hero");
   const isAr = locale === "ar";
 
+  const buyers = [
+    "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=60&q=80",
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&q=80",
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&q=80",
+    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&q=80",
+  ];
+
   return (
-    <section className="relative overflow-hidden bg-souk-green-900">
-      <div className="relative max-w-7xl mx-auto px-4 py-12 md:py-20 grid lg:grid-cols-2 gap-8 items-center">
-        {/* Text */}
+    <section className="relative overflow-hidden bg-souk-green-900 min-h-[88vh] flex items-center">
+
+      {/* Radial gold glow — bottom-start */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_70%_at_0%_100%,rgba(184,134,11,0.13)_0%,transparent_60%)] pointer-events-none" />
+
+      {/* Zellige checkerboard — top-end */}
+      <div
+        className="absolute top-0 end-0 w-[420px] h-[420px] opacity-[0.045] pointer-events-none"
+        style={{ backgroundImage: "repeating-conic-gradient(#D4A017 0% 25%, transparent 0% 50%)", backgroundSize: "28px 28px" }}
+      />
+
+      {/* Soft vignette edge */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_50%,transparent_55%,rgba(0,0,0,0.35)_100%)] pointer-events-none" />
+
+      <div className="relative w-full max-w-7xl mx-auto px-4 py-16 md:py-20 grid lg:grid-cols-[56%_44%] gap-10 items-center">
+
+        {/* ── Left: Content ── */}
         <div className="text-white z-10 order-2 lg:order-1">
-          <div className="inline-flex items-center gap-2 bg-souk-gold-500/20 border border-souk-gold-500/40 rounded-full px-3 py-1 text-souk-gold-300 text-sm font-medium mb-6">
+
+          {/* Eyebrow badge */}
+          <div className="inline-flex items-center gap-2 bg-souk-gold-500/15 border border-souk-gold-500/30 rounded-full px-4 py-1.5 text-souk-gold-300 text-sm font-semibold mb-6 backdrop-blur-sm">
             <Gem size={13} className="text-souk-gold-400" />
             <span>Marketplace 100% Marocaine</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-souk-gold-400 animate-pulse" />
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-4 text-white">
+
+          {/* Headline */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight mb-5 text-white">
             {isAr ? (
-              <>الصناعة التقليدية المغربية<br /><span className="text-souk-gold-400">بين يديك</span></>
+              <>
+                الصناعة التقليدية<br />
+                المغربية<br />
+                <span className="text-souk-gold-400">بين يديك</span>
+              </>
             ) : (
-              <>L&apos;artisanat marocain<br /><span className="text-souk-gold-400">à portée de clic</span></>
+              <>
+                L&apos;artisanat<br />
+                marocain<br />
+                <span className="text-souk-gold-400 italic">à portée de clic</span>
+              </>
             )}
           </h1>
-          <p className="text-souk-green-300 text-lg mb-8 max-w-md">
+
+          <p className="text-souk-green-300 text-[1.05rem] leading-relaxed mb-7 max-w-[26rem]">
             {isAr
               ? "اكتشف آلاف المنتجات الأصيلة المعتمدة، مع توصيل في كل أنحاء المغرب"
               : "Découvrez des milliers de produits authentiques certifiés, avec livraison partout au Maroc"}
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link href={`/${locale}`}>
+
+          {/* Search bar */}
+          <Link
+            href={`/${locale}/recherche`}
+            className="group flex items-center gap-3 bg-white/8 hover:bg-white/12 border border-white/12 hover:border-souk-gold-400/50 rounded-2xl px-4 py-3.5 mb-6 transition-all duration-200 w-full max-w-[28rem] backdrop-blur-sm"
+          >
+            <Search size={17} className="text-souk-green-400 group-hover:text-souk-gold-400 transition-colors shrink-0" />
+            <span className="text-souk-green-400 text-sm flex-1 group-hover:text-souk-green-300 transition-colors">
+              {isAr ? "ابحث عن منتج، حرفي، متجر..." : "Rechercher un produit, artisan, boutique..."}
+            </span>
+            <span className="shrink-0 text-[11px] bg-souk-gold-500/20 border border-souk-gold-500/30 text-souk-gold-400 rounded-lg px-2 py-1 font-semibold">
+              {isAr ? "بحث" : "Chercher"}
+            </span>
+          </Link>
+
+          {/* CTA buttons */}
+          <div className="flex flex-wrap gap-3 mb-9">
+            <Link href={`/${locale}/recherche`}>
               <Button variant="gold" size="lg" rightIcon={<ArrowRight size={18} />}>
                 {isAr ? "استكشف الآن" : "Explorer maintenant"}
               </Button>
             </Link>
             <Link href={`/${locale}/account/become-vendor`}>
-              <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="outline" size="lg" className="border-white/25 text-white hover:bg-white/10">
                 {isAr ? "أنشئ متجرك" : "Ouvrir ma boutique"}
               </Button>
             </Link>
           </div>
-          {/* Stats */}
-          <div className="flex gap-8 mt-10 pt-8 border-t border-souk-green-700">
-            {[
-              { value: "50K+", label: isAr ? "منتج" : "Produits" },
-              { value: "1K+",  label: isAr ? "بائع" : "Vendeurs" },
-              { value: "99%",  label: isAr ? "رضا العملاء" : "Satisfaction client" },
-            ].map((s) => (
-              <div key={s.label}>
-                <p className="text-2xl font-black text-souk-gold-400">{s.value}</p>
-                <p className="text-xs text-souk-green-400">{s.label}</p>
+
+          {/* Social proof + stats */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 pt-7 border-t border-souk-green-700/50">
+            {/* Buyer avatars */}
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="flex -space-x-2.5 rtl:space-x-reverse">
+                {buyers.map((src, i) => (
+                  <div key={i} className="relative w-9 h-9 rounded-full border-2 border-souk-green-900 overflow-hidden ring-1 ring-souk-green-700">
+                    <Image src={src} alt="acheteur" fill sizes="36px" className="object-cover" />
+                  </div>
+                ))}
               </div>
-            ))}
+              <div>
+                <p className="text-white text-sm font-bold leading-none">5 000+</p>
+                <p className="text-souk-green-400 text-[11px] mt-0.5">
+                  {isAr ? "مشتري نشط" : "acheteurs actifs"}
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden sm:block h-10 w-px bg-souk-green-700/60" />
+
+            {/* Stats */}
+            <div className="flex gap-7">
+              {[
+                { value: "50K+", label: isAr ? "منتج" : "Produits" },
+                { value: "1K+",  label: isAr ? "بائع" : "Vendeurs" },
+                { value: "99%",  label: isAr ? "رضا العملاء" : "Satisfaction" },
+              ].map((s) => (
+                <div key={s.label}>
+                  <p className="text-[1.4rem] font-black text-souk-gold-400 leading-none">{s.value}</p>
+                  <p className="text-[11px] text-souk-green-400 mt-1">{s.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Hero image mosaic */}
-        <div className="relative order-1 lg:order-2 h-64 sm:h-80 lg:h-[480px]">
-          <div className="grid grid-cols-2 gap-3 h-full">
-            <div className="grid grid-rows-2 gap-3 h-full">
-              <div className="relative rounded-2xl overflow-hidden min-h-0">
-                <Image src="https://images.unsplash.com/photo-1548516173-3cabfa4607e9?w=400&q=80" alt="Artisanat" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
+        {/* ── Right: Image mosaic ── */}
+        <div className="relative order-1 lg:order-2 h-[320px] sm:h-[440px] lg:h-[580px]">
+
+          {/* Decorative glow ring */}
+          <div className="absolute -inset-3 rounded-[2.5rem] border border-souk-gold-500/10 pointer-events-none" />
+
+          {/* Mosaic: main tall left + 2 stacked right */}
+          <div className="grid grid-cols-[3fr_2fr] gap-3 h-full">
+
+            {/* Main tall image */}
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <Image
+                src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=800&q=80"
+                alt="Artisanat marocain"
+                fill priority
+                sizes="(max-width: 1024px) 60vw, 28vw"
+                className="object-cover"
+              />
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-souk-green-900/80 via-souk-green-900/10 to-transparent" />
+
+              {/* Certified badge — top */}
+              <div className="absolute top-4 start-4 flex items-center gap-2 bg-souk-gold-500 text-souk-green-900 rounded-xl px-3 py-2 shadow-xl">
+                <Award size={14} strokeWidth={2.5} />
+                <div>
+                  <p className="text-[11px] font-black leading-none">
+                    {isAr ? "معتمد رسميًا" : "Artisanat certifié"}
+                  </p>
+                  <p className="text-[10px] font-medium opacity-75 mt-0.5">
+                    {isAr ? "+٥٠٠ حرفي" : "+500 artisans"}
+                  </p>
+                </div>
               </div>
-              <div className="relative rounded-2xl overflow-hidden min-h-0">
-                <Image src="https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80" alt="Argan" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
+
+              {/* Floating product card — bottom */}
+              <div className="absolute bottom-4 start-3 end-3 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-souk-green-100">
+                    <Image
+                      src="https://images.unsplash.com/photo-1548516173-3cabfa4607e9?w=100&q=80"
+                      alt="produit"
+                      fill sizes="44px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-gray-800 leading-tight truncate">
+                      {isAr ? "طاجين أصيل" : "Tajine artisanal"}
+                    </p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={9} className="text-souk-gold-500 fill-souk-gold-500" />
+                      ))}
+                      <span className="text-[10px] text-gray-400 ms-0.5">(128)</span>
+                    </div>
+                  </div>
+                  <p className="text-souk-gold-600 font-black text-sm shrink-0">320 MAD</p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1.5">
+                  <BadgeCheck size={12} className="text-emerald-500 shrink-0" />
+                  <p className="text-[10px] text-gray-500 font-medium">
+                    {isAr ? "متاح — توصيل اليوم" : "En stock — livraison aujourd'hui"}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="relative rounded-2xl overflow-hidden">
-              <Image src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=600&q=80" alt="Tapis" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
-              <div className="absolute bottom-3 start-3 bg-white/95 backdrop-blur rounded-xl px-3 py-2 shadow-lg">
-                <p className="text-xs font-semibold text-souk-green-800 flex items-center gap-1"><Star size={11} className="text-souk-gold-500 fill-souk-gold-500" />Artisanat certifié</p>
-                <p className="text-xs text-gray-500">+500 artisans partenaires</p>
+
+            {/* 2 stacked smaller images */}
+            <div className="grid grid-rows-2 gap-3">
+
+              {/* Top-right */}
+              <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                <Image
+                  src="https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80"
+                  alt="Argan"
+                  fill
+                  sizes="(max-width: 1024px) 40vw, 18vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-souk-green-900/50" />
+                <div className="absolute bottom-2.5 start-2.5 flex items-center gap-1 bg-white/20 backdrop-blur-sm border border-white/20 rounded-lg px-2 py-1">
+                  <Star size={10} className="text-souk-gold-400 fill-souk-gold-400" />
+                  <span className="text-white text-[10px] font-bold">4.9</span>
+                </div>
               </div>
+
+              {/* Bottom-right */}
+              <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                <Image
+                  src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80"
+                  alt="Souk"
+                  fill
+                  sizes="(max-width: 1024px) 40vw, 18vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-souk-green-900/50" />
+                <div className="absolute inset-0 flex items-end p-2.5">
+                  <div className="flex items-center gap-1 bg-souk-gold-500/90 backdrop-blur-sm rounded-lg px-2 py-1">
+                    <Zap size={10} className="text-souk-green-900 fill-souk-green-900" />
+                    <span className="text-souk-green-900 text-[10px] font-black">
+                      {isAr ? "عرض اليوم" : "Deal du jour"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Zellige decorative dots */}
-      <div className="absolute top-0 end-0 w-64 h-64 opacity-5">
-        <div className="grid grid-cols-8 gap-2 p-4">
-          {Array.from({ length: 64 }).map((_, i) => (
-            <div key={i} className="h-2 w-2 rounded-full bg-souk-gold-500" />
-          ))}
         </div>
       </div>
     </section>
@@ -146,24 +299,43 @@ function CategorySection({ locale, categories }: {
   const isAr = locale === "ar";
   if (categories.length === 0) return null;
   return (
-    <section className="py-10 max-w-7xl mx-auto px-4">
-      <SectionHeader
-        title={isAr ? "فئاتنا" : "Nos Catégories"}
-        viewAllHref={`/${locale}/recherche`}
-        viewAllLabel={isAr ? "عرض الكل" : "Voir tout"}
-      />
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {categories.map((cat) => (
-          <CategoryCard
-            key={cat.id}
-            slug={cat.slug}
-            name={isAr ? cat.nameAr : cat.name}
-            emoji={cat.emoji ?? undefined}
-            image={cat.imageUrl ?? ""}
-            locale={locale}
-            size="md"
-          />
-        ))}
+    <section className="py-14 bg-gradient-to-b from-[#F5EFE4] to-white">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Enhanced header */}
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <p className="flex items-center gap-2 text-souk-gold-600 text-xs font-bold uppercase tracking-widest mb-2">
+              <span className="inline-block w-5 h-px bg-souk-gold-500" />
+              {isAr ? "تسوق حسب الفئة" : "Parcourir par catégorie"}
+              <span className="inline-block w-5 h-px bg-souk-gold-500" />
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-black text-souk-green-900 leading-tight">
+              {isAr ? "فئاتنا" : "Nos Catégories"}
+            </h2>
+          </div>
+          <Link
+            href={`/${locale}/recherche`}
+            className="group flex items-center gap-1.5 text-souk-green-700 hover:text-souk-gold-600 font-semibold text-sm transition-colors"
+          >
+            {isAr ? "عرض الكل" : "Voir tout"}
+            <ChevronRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </div>
+
+        {/* Category grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {categories.map((cat) => (
+            <CategoryCard
+              key={cat.id}
+              slug={cat.slug}
+              name={isAr ? cat.nameAr : cat.name}
+              emoji={cat.emoji ?? undefined}
+              image={cat.imageUrl ?? ""}
+              locale={locale}
+              size="md"
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

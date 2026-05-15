@@ -6,6 +6,7 @@ import { Home, Grid3x3, ShoppingCart, User, Tag } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 interface MobileNavProps { locale: string }
 
@@ -13,12 +14,14 @@ export default function MobileNav({ locale }: MobileNavProps) {
   const t = useTranslations("navigation");
   const pathname = usePathname();
   const itemCount = useCartStore((s) => s.itemCount());
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   const items = [
     { key: "home",       href: `/${locale}`,             Icon: Home },
     { key: "categories", href: `/${locale}`,              Icon: Grid3x3 },
     { key: "deals",      href: `/${locale}/recherche`,   Icon: Tag },
-    { key: "cart",       href: `/${locale}/cart`,        Icon: ShoppingCart, badge: itemCount },
+    { key: "cart",       href: `/${locale}/cart`,        Icon: ShoppingCart, badge: mounted ? itemCount : 0 },
     { key: "profile",    href: `/${locale}/profil`,      Icon: User },
   ];
 

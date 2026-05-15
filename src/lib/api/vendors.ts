@@ -18,7 +18,7 @@ export const vendorsApi = {
     return get<Page<VendorSummaryDto>>(`/vendors${s ? `?${s}` : ""}`);
   },
 
-  getBySlug: (slug: string) => get<VendorDetailDto>(`/vendors/${slug}`),
+  getBySlug: (slug: string) => get<VendorDetailDto>(`/vendors/${slug}/storefront`),
 
   getProducts: (slug: string, page = 0) =>
     get<Page<ProductSummaryDto>>(`/vendors/${slug}/products?page=${page}`),

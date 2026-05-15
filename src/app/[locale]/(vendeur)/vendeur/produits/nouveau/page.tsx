@@ -144,11 +144,11 @@ export default function NewProductPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">{isAr ? "العلامة — اختياري" : "Badge — optionnel"}</label>
             <select className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-souk-green-500 bg-white" {...register("badge")}>
               <option value="">{isAr ? "بدون علامة" : "Aucun badge"}</option>
-              <option value="NEW">{isAr ? "جديد" : "Nouveau"}</option>
-              <option value="SALE">{isAr ? "تخفيض" : "Promo"}</option>
-              <option value="TOP">{isAr ? "الأكثر مبيعًا" : "Top ventes"}</option>
-              <option value="ARTISAN">{isAr ? "حرفي" : "Artisan"}</option>
-              <option value="FLASH">{isAr ? "عرض لمحدود الوقت" : "Vente flash"}</option>
+              <option value="new">{isAr ? "جديد" : "Nouveau"}</option>
+              <option value="sale">{isAr ? "تخفيض" : "Promo"}</option>
+              <option value="top">{isAr ? "الأكثر مبيعًا" : "Top ventes"}</option>
+              <option value="artisan">{isAr ? "حرفي" : "Artisan"}</option>
+              <option value="flash">{isAr ? "عرض لمحدود الوقت" : "Vente flash"}</option>
             </select>
           </div>
         </section>

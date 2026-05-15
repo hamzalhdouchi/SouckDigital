@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle, ChevronRight, Truck, CreditCard, Smartphone, Building2, Banknote, Zap, Package, AlertCircle } from "lucide-react";
+import { CheckCircle, ChevronRight, Truck, CreditCard, Smartphone, Building2, Banknote, Zap, Package, AlertCircle, Loader2 } from "lucide-react";
 import Button from "@/components/ui/button";
 import { DeliveryAddressForm, type DeliveryAddressFormRef } from "@/components/modules/delivery-address-form";
 import { useCartStore } from "@/lib/store/cart";
@@ -14,6 +14,7 @@ import { paymentApi } from "@/lib/api/payment";
 import type { PlaceOrderRequest } from "@/lib/api/types";
 
 type Step = 1 | 2 | 3;
+type PostOrderState = "none" | "mobile_pending" | "transfer_pending";
 
 const PAYMENT_METHODS = [
   { id: "cod",      icon: Banknote,    label: "Paiement à la livraison",   sub: "Payez cash à la réception",        popular: true },
@@ -42,6 +43,8 @@ export default function CheckoutPage() {
   const [confirmedOrderId, setConfirmedOrderId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [postOrderState, setPostOrderState] = useState<PostOrderState>("none");
+  const [pendingOrderId, setPendingOrderId] = useState("");
 
   const [deliveryMethod, setDeliveryMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState("cod");
@@ -81,6 +84,77 @@ export default function CheckoutPage() {
           </Link>
           <Link href={`/${locale}/account/orders`}>
             <Button>Suivre ma commande</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (postOrderState === "mobile_pending") {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
+        <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center mb-6">
+          <Loader2 size={40} className="text-blue-500 animate-spin" />
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          {isAr ? "بانتظار تأكيد الدفع عبر الهاتف" : "Paiement Mobile Money en attente"}
+        </h1>
+        <p className="text-gray-600 mb-2">
+          {isAr ? "رقم الطلب:" : "Commande n°"} <strong>#{pendingOrderId.slice(0, 8).toUpperCase()}</strong>
+        </p>
+        <p className="text-sm text-gray-500 mb-8 max-w-md">
+          {isAr
+            ? "سيتم إرسال طلب تأكيد إلى هاتفك عبر Inwi Money / Orange Money / M-Wallet. يمكنك متابعة حالة طلبك من حسابك."
+            : "Une demande de confirmation sera envoyée sur votre téléphone via Inwi Money, Orange Money ou M-Wallet. Suivez l'état de votre commande depuis votre espace personnel."}
+        </p>
+        <div className="flex gap-3">
+          <Link href={`/${locale}`}>
+            <Button variant="outline">{isAr ? "الرئيسية" : "Accueil"}</Button>
+          </Link>
+          <Link href={`/${locale}/account/orders`}>
+            <Button>{isAr ? "تتبع طلبي" : "Suivre ma commande"}</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (postOrderState === "transfer_pending") {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
+        <div className="h-20 w-20 rounded-full bg-amber-100 flex items-center justify-center mb-6">
+          <Building2 size={40} className="text-amber-500" />
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          {isAr ? "أكمل التحويل البنكي" : "Finalisez votre virement bancaire"}
+        </h1>
+        <p className="text-gray-600 mb-2">
+          {isAr ? "رقم الطلب:" : "Commande n°"} <strong>#{pendingOrderId.slice(0, 8).toUpperCase()}</strong>
+        </p>
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6 text-left max-w-sm w-full">
+          <p className="text-sm font-bold text-amber-800 mb-3">{isAr ? "تفاصيل الحساب البنكي" : "Coordonnées bancaires"}</p>
+          <div className="space-y-1 text-sm text-amber-900">
+            <p><span className="font-semibold">{isAr ? "البنك:" : "Banque :"}</span> CIH Bank</p>
+            <p><span className="font-semibold">{isAr ? "الاسم:" : "Nom :"}</span> Souk Digital SARL</p>
+            <p><span className="font-semibold">RIB :</span> 230 780 4567891234567890 12</p>
+            <p className="mt-2 text-xs text-amber-700">
+              {isAr
+                ? "أذكر رقم الطلب كمرجع للتحويل"
+                : `Indiquez la référence : #${pendingOrderId.slice(0, 8).toUpperCase()}`}
+            </p>
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 mb-8 max-w-md">
+          {isAr
+            ? "سيتم تأكيد طلبك خلال 24 ساعة بعد استلام التحويل."
+            : "Votre commande sera confirmée sous 24h après réception du virement."}
+        </p>
+        <div className="flex gap-3">
+          <Link href={`/${locale}`}>
+            <Button variant="outline">{isAr ? "الرئيسية" : "Accueil"}</Button>
+          </Link>
+          <Link href={`/${locale}/account/orders`}>
+            <Button>{isAr ? "تتبع طلبي" : "Suivre ma commande"}</Button>
           </Link>
         </div>
       </div>
@@ -237,11 +311,24 @@ export default function CheckoutPage() {
                         promoCode: promoCode ?? undefined,
                       });
                       clearCart();
-                      if (PAYMENT_METHOD_MAP[paymentMethod] === "CARD_CMI") {
+                      const method = PAYMENT_METHOD_MAP[paymentMethod];
+                      if (method === "CARD_CMI") {
                         const cmi = await paymentApi.initCmi(order.id);
                         router.push(cmi.paymentUrl);
                         return;
                       }
+                      if (method === "MOBILE") {
+                        await paymentApi.initMobile(order.id);
+                        setPendingOrderId(order.id);
+                        setPostOrderState("mobile_pending");
+                        return;
+                      }
+                      if (method === "TRANSFER") {
+                        setPendingOrderId(order.id);
+                        setPostOrderState("transfer_pending");
+                        return;
+                      }
+                      // COD
                       setConfirmedOrderId(order.id);
                       setConfirmed(true);
                     } catch (err: unknown) {

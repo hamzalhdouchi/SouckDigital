@@ -5,6 +5,9 @@ export const paymentApi = {
   initCmi: (orderId: string) =>
     post<CmiInitResponse>("/payment/cmi/init", { orderId }),
 
+  initMobile: (orderId: string) =>
+    post<{ message: string }>(`/payment/mobile/init?orderId=${orderId}`, undefined),
+
   getStatus: (orderId: string) =>
     get<PaymentStatusDto>(`/payment/order/${orderId}`),
 };

@@ -4,12 +4,24 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 import Button from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { adminApi } from "@/lib/api/admin";
 import { formatPrice } from "@/lib/utils";
 import type { OrderStatus } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
+
+// Valid forward transitions only — prevents nonsensical reversals
+const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  PENDING:    ["CONFIRMED", "CANCELLED"],
+  CONFIRMED:  ["PROCESSING", "CANCELLED"],
+  PROCESSING: ["SHIPPED", "CANCELLED"],
+  SHIPPED:    ["DELIVERED"],
+  DELIVERED:  ["REFUNDED"],
+  CANCELLED:  [],
+  REFUNDED:   [],
+};
 
 const STATUS_META: Record<OrderStatus, { labelFr: string; labelAr: string; color: string }> = {
   PENDING:    { labelFr: "En attente",    labelAr: "في الانتظار",  color: "text-gray-600 bg-gray-50 border-gray-200" },
@@ -39,12 +51,24 @@ export default function AdminOrdersPage() {
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
       adminApi.overrideOrderStatus(id, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-orders"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      toast.success(isAr ? "تم تحديث حالة الطلب" : "Statut de commande mis à jour");
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof Error ? err.message : (isAr ? "فشل تحديث الحالة" : "Échec de la mise à jour du statut"));
+    },
   });
 
   const refundMutation = useMutation({
     mutationFn: (id: string) => adminApi.refundOrder(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-orders"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      toast.success(isAr ? "تم رد المبلغ بنجاح" : "Remboursement effectué");
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof Error ? err.message : (isAr ? "فشل رد المبلغ" : "Échec du remboursement"));
+    },
   });
 
   const orders = data?.content ?? [];
@@ -105,10 +129,18 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-3">
                         <select
                           value={order.status}
-                          onChange={(e) => statusMutation.mutate({ id: order.id, status: e.target.value as OrderStatus })}
-                          className={cn("text-xs font-semibold px-2.5 py-1 rounded-full border cursor-pointer focus:outline-none", meta.color)}
+                          onChange={(e) => {
+                            const next = e.target.value as OrderStatus;
+                            if (!VALID_TRANSITIONS[order.status].includes(next)) return;
+                            statusMutation.mutate({ id: order.id, status: next });
+                          }}
+                          disabled={statusMutation.isPending || VALID_TRANSITIONS[order.status].length === 0}
+                          className={cn("text-xs font-semibold px-2.5 py-1 rounded-full border focus:outline-none",
+                            VALID_TRANSITIONS[order.status].length === 0 ? "cursor-not-allowed opacity-70" : "cursor-pointer",
+                            meta.color)}
                         >
-                          {ALL_STATUSES.map((s) => (
+                          <option value={order.status}>{isAr ? STATUS_META[order.status].labelAr : STATUS_META[order.status].labelFr}</option>
+                          {VALID_TRANSITIONS[order.status].map((s) => (
                             <option key={s} value={s}>{isAr ? STATUS_META[s].labelAr : STATUS_META[s].labelFr}</option>
                           ))}
                         </select>

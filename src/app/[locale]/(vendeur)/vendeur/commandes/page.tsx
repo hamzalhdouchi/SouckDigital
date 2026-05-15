@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import Button from "@/components/ui/button";
 import { vendorDashboardApi } from "@/lib/api/vendor-dashboard";
@@ -41,7 +42,11 @@ export default function VendeurCommandesPage() {
   const updateStatus = useMutation({
     mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
       ordersApi.updateStatus(id, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["vendor-orders-page"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["vendor-orders-page"] });
+      toast.success(isAr ? "تم تحديث الحالة" : "Statut mis à jour");
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Échec de la mise à jour"),
   });
 
   const orders = (data?.content ?? []).filter((o) => {

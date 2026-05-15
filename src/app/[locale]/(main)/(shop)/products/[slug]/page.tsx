@@ -21,6 +21,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { useAuthStore } from "@/lib/store/auth";
 import { useProduct, useRelatedProducts } from "@/lib/hooks/use-products";
 import { useReviews, useReviewStats, useAddReview } from "@/lib/hooks/use-reviews";
+import { useWishlistIds, useToggleWishlist } from "@/lib/hooks/use-wishlist";
 import { cn, formatPriceSimple, calculateDiscount } from "@/lib/utils";
 import type { ReviewDetailDto, ReviewStatsDto } from "@/lib/api/types";
 
@@ -45,8 +46,10 @@ export default function ProductDetailPage() {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize,  setSelectedSize]  = useState<string | null>(null);
   const [activeTab,    setActiveTab]    = useState<"description" | "details" | "reviews">("description");
-  const [wished,       setWished]       = useState(false);
-  const [adding,       setAdding]       = useState(false);
+  const { data: wishedIds = [] } = useWishlistIds();
+  const toggleWishlist = useToggleWishlist();
+  const wished = product ? wishedIds.includes(product.id) : false;
+  const [adding, setAdding] = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
 
@@ -272,7 +275,8 @@ export default function ProductDetailPage() {
             </Button>
 
             <div className="flex gap-3 mb-6">
-              <button onClick={() => setWished((w) => !w)}
+              <button onClick={() => product && toggleWishlist.mutate(product.id)}
+                disabled={toggleWishlist.isPending}
                 className={cn("flex items-center gap-2 text-sm px-4 py-2 rounded-lg border transition-colors",
                   wished ? "border-red-300 text-red-500 bg-red-50" : "border-gray-300 text-gray-600 hover:border-souk-terracotta-400")}>
                 <Heart size={16} fill={wished ? "currentColor" : "none"} />
@@ -410,7 +414,8 @@ export default function ProductDetailPage() {
           <p className="text-xs text-gray-500 truncate">{isAr ? product.nameAr : product.name}</p>
           <p className="font-black text-souk-green-800 text-lg">{formatPriceSimple(product.price)}</p>
         </div>
-        <button onClick={() => setWished((w) => !w)}
+        <button onClick={() => product && toggleWishlist.mutate(product.id)}
+          disabled={toggleWishlist.isPending}
           className={cn("p-3 rounded-xl border transition-colors shrink-0",
             wished ? "border-red-300 text-red-500 bg-red-50" : "border-gray-300 text-gray-500")}>
           <Heart size={20} fill={wished ? "currentColor" : "none"} />

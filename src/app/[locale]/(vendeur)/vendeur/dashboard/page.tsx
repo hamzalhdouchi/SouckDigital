@@ -11,6 +11,7 @@ import {
   BarChart3, Package, ShoppingBag, Star, TrendingUp, TrendingDown,
   Plus, ArrowUpRight, Zap,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice, cn } from "@/lib/utils";
 import { vendorDashboardApi } from "@/lib/api/vendor-dashboard";
@@ -61,6 +62,7 @@ export default function VendorDashboardPage() {
     mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
       ordersApi.updateStatus(id, status),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["vendor-orders-recent"] }),
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Échec de la mise à jour"),
   });
 
   const greetingHour = new Date().getHours();

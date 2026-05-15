@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, XCircle, Award, ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 import Button from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { adminApi } from "@/lib/api/admin";
@@ -25,11 +26,13 @@ export default function AdminVendorsPage() {
     mutationFn: ({ id, verify }: { id: string; verify: boolean }) =>
       verify ? adminApi.verifyVendor(id) : adminApi.unverifyVendor(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-vendors"] }),
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Échec de l'opération"),
   });
 
   const artisanMutation = useMutation({
     mutationFn: (id: string) => adminApi.toggleArtisan(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-vendors"] }),
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Échec de l'opération"),
   });
 
   const vendors = data?.content ?? [];

@@ -104,6 +104,7 @@ export interface ProductSummaryDto {
   freeDelivery: boolean;
   city: string | null;
   vendor: ProductVendorDto;
+  isActive: boolean;
 }
 
 export interface ProductDetailDto extends ProductSummaryDto {

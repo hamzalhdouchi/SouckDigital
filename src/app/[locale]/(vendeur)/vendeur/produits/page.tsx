@@ -22,12 +22,15 @@ export default function VendeurProduitsPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["vendor-products"],
-    queryFn: () => productsApi.getAll({ page: 0, size: 50 }),
+    queryFn: () => productsApi.getOwn(0, 50),
   });
 
   const toggleProduct = useMutation({
     mutationFn: (id: string) => productsApi.toggleActive(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["vendor-products"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["vendor-products"] });
+      qc.invalidateQueries({ queryKey: ["products"] });
+    },
   });
 
   const deleteProduct = useDeleteProduct();
@@ -170,7 +173,7 @@ function ProductsTable({
               </td>
               <td className="px-5 py-3.5">
                 <button onClick={() => onToggle(p.id)} className="flex items-center gap-1.5 text-xs font-semibold">
-                  {p.inStock
+                  {p.isActive
                     ? <><ToggleRight size={20} className="text-souk-green-600" /><span className="text-souk-green-700">{isAr ? "نشط" : "Actif"}</span></>
                     : <><ToggleLeft size={20} className="text-gray-400" /><span className="text-gray-400">{isAr ? "معطل" : "Désactivé"}</span></>}
                 </button>
@@ -182,7 +185,7 @@ function ProductsTable({
                       <Eye size={14} />
                     </button>
                   </Link>
-                  <Link href={`/${locale}/vendeur/produits/${p.id}/modifier`}>
+                  <Link href={`/${locale}/vendeur/produits/${p.slug}/modifier`}>
                     <button className="p-1.5 hover:bg-souk-green-50 rounded-lg transition-colors text-gray-400 hover:text-souk-green-700">
                       <Edit2 size={14} />
                     </button>

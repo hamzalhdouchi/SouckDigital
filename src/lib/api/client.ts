@@ -78,7 +78,8 @@ async function apiRequest<T>(
       useAuthStore.getState().logout();
     } catch { /* noop */ }
     if (typeof window !== "undefined") {
-      window.location.href = "/fr/login";
+      const locale = window.location.pathname.split("/")[1] ?? "fr";
+      window.location.href = `/${locale}/login`;
     }
     throw new ApiError(401, "Session expirée, veuillez vous reconnecter.");
   }

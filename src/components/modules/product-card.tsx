@@ -7,6 +7,8 @@ import { useState } from "react";
 import Badge from "@/components/ui/badge";
 import Rating from "@/components/ui/rating";
 import { useCartStore } from "@/lib/store/cart";
+import { useWishlistIds, useToggleWishlist } from "@/lib/hooks/use-wishlist";
+import { useAuthStore } from "@/lib/store/auth";
 import { calculateDiscount, cn, formatPriceSimple } from "@/lib/utils";
 
 export interface ProductCardProps {
@@ -30,10 +32,19 @@ export default function ProductCard({
   id, slug, name, price, originalPrice, image, rating, reviewCount,
   vendor, badge, inStock = true, freeDelivery, locale, variant = "grid",
 }: ProductCardProps) {
-  const [wished, setWished] = useState(false);
   const [added, setAdded] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
+  const isLoggedIn = !!useAuthStore((s) => s.token);
+  const { data: wishedIds = [] } = useWishlistIds();
+  const { mutate: toggleWishlist } = useToggleWishlist();
+  const wished = wishedIds.includes(id);
   const discount = originalPrice ? calculateDiscount(originalPrice, price) : 0;
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isLoggedIn) return;
+    toggleWishlist(id);
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -101,7 +112,7 @@ export default function ProductCard({
 
         {/* Wishlist */}
         <button
-          onClick={(e) => { e.preventDefault(); setWished((w) => !w); }}
+          onClick={handleWishlist}
           className={cn(
             "absolute top-2 end-2 p-1.5 rounded-full bg-white/90 backdrop-blur-sm shadow-sm transition-all",
             "opacity-0 group-hover:opacity-100",
